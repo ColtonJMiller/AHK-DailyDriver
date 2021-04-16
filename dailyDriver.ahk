@@ -34,10 +34,10 @@ return
 
 ;focused application volume
 F13::
-Run cmd.exe /c start C:\Users\Colto\Documents\AutoHotKeyScripts\VolumeWithNirCMD\nircmd.exe changeappvolume focused -0.1 ,,Hide
+Run cmd.exe /c start nircmd.exe changeappvolume focused -0.1 ,,Hide
 return
 F14::
-Run cmd.exe /c start C:\Users\Colto\Documents\AutoHotKeyScripts\VolumeWithNirCMD\nircmd.exe changeappvolume focused +0.1 ,,Hide
+Run cmd.exe /c start nircmd.exe changeappvolume focused +0.1 ,,Hide
 return
 
 ;Browser volume control
@@ -65,13 +65,13 @@ IfWinExist, ahk_class MozillaWindowClass
     uniqMultiArr := uniq(multiWindowArr)
     For e, v in uniqMultiArr 
     {
-        Run cmd.exe /c start C:\Users\Colto\Documents\AutoHotKeyScripts\VolumeWithNirCMD\nircmd.exe changeappvolume /%v% +0.1 ,,Hide
+        Run cmd.exe /c start nircmd.exe changeappvolume /%v% +0.1 ,,Hide
     }    
 }
 ;Check for active Google Chrome
 IfWinExist, Google Chrome
 {
-    Run cmd.exe /c start C:\Users\Colto\Documents\AutoHotKeyScripts\VolumeWithNirCMD\nircmd.exe changeappvolume chrome.exe +0.1 ,,Hide
+    Run cmd.exe /c start nircmd.exe changeappvolume chrome.exe +0.1 ,,Hide
 }
 return
 ;Browser Volume down
@@ -97,12 +97,12 @@ IfWinExist, ahk_class MozillaWindowClass
     uniqMultiArr := uniq(multiWindowArr)
     For e, v in uniqMultiArr 
     {
-        Run cmd.exe /c start C:\Users\Colto\Documents\AutoHotKeyScripts\VolumeWithNirCMD\nircmd.exe changeappvolume /%v% -0.1 ,,Hide
+        Run cmd.exe /c start nircmd.exe changeappvolume /%v% -0.1 ,,Hide
     }    
 }
 ;Check for active Google Chrome
 IfWinExist, Google Chrome
 {
-    Run cmd.exe /c start C:\Users\Colto\Documents\AutoHotKeyScripts\VolumeWithNirCMD\nircmd.exe changeappvolume chrome.exe -0.1 ,,Hide
+    Run cmd.exe /c start nircmd.exe changeappvolume chrome.exe -0.1 ,,Hide
 }
 return
