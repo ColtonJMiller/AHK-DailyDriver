@@ -1,6 +1,5 @@
 SetTitleMatchMode, 2
 #Include, Functions.ahk
-
 ;All active Windows
     +^!K::
         WinGet,Windows,List
@@ -12,12 +11,20 @@ SetTitleMatchMode, 2
             WinGet, this_PID, PID, %this_id%
             MsgBox, %this_title% %this_PID%
         }
+        Return
 
 ;Script reload
     +!R:: 
         MsgBox, Reloading Script dailyDriver.ahk
         Reload
         return
+
+; Application Sizing and movement
+
+;Second monitor active window send    
+    +^Up::
+        WinMove, A,, -8, -8, [Width, Height, ExcludeTitle, ExcludeText]
+
 
 ; Application Run/Kill handling
 
@@ -342,3 +349,16 @@ SetTitleMatchMode, 2
             Run cmd.exe /c start nircmd.exe changeappvolume chrome.exe -0.1 ,,Hide
         }
         return
+;Line in volume up
+    F17::
+        IfWinExist, VoiceMeeter 
+        {
+            Run cmd.exe /c start nircmd.exe changeappvolume Voicemeeter.exe -0.1 ,,Hide            
+        }
+        return  
+    F18::  
+        IfWinExist, VoiceMeeter 
+        {
+            Run cmd.exe /c start nircmd.exe changeappvolume Voicemeeter.exe +0.1 ,,Hide            
+        } 
+        return     
