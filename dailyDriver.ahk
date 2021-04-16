@@ -3,18 +3,16 @@ SetTitleMatchMode, 2
 
 ;Script reload
     +!r:: 
+        MsgBox, Reloading Script dailyDriver.ahk
         Reload
         return
 
 ; Application Run/Kill handling
 
 ;FireFox
-
-;Firefox profile alt
     F23::
         Run, "C:\Program Files\Mozilla Firefox\firefox.exe" -p HifiVox
         return
-;Firefox profile main    
     F24::
         Run, "C:\Program Files\Mozilla Firefox\firefox.exe" -p default-release
         return
@@ -23,6 +21,11 @@ SetTitleMatchMode, 2
         IfWinExist, Steam 
         {
             Process, close, steam.exe
+            ;location of .bat must be changed
+            Run, "C:\Users\Colto\Documents\SteamMain.bat" ,,Hide
+        }
+        IfWinNotExist, Steam
+        {
             ;location of .bat must be changed
             Run, "C:\Users\Colto\Documents\SteamMain.bat" ,,Hide
         }
@@ -35,7 +38,13 @@ SetTitleMatchMode, 2
             ;location of .bat must be changed
             Run, "C:\Users\Colto\Documents\SteamPBX.bat" ,,Hide
         }
+        IfWinNotExist, Steam 
+        {
+            ;location of .bat must be changed
+            Run, "C:\Users\Colto\Documents\SteamPBX.bat" ,,Hide
+        }
         return
+
 ;Volume controls
 
 ;focused application volume
@@ -64,11 +73,9 @@ SetTitleMatchMode, 2
                 WinGet, this_PID, PID, %this_id%
                 If (this_class = "MozillaWindowClass") 
                 {
-                    Run cmd.exe /c start nircmd.exe changeappvolume chrome.exe +0.1 ,,Hide
                     multiWinCounter += 1
                     multiWindowArr.Push(this_PID)
                 }
-                return
             }
             uniqMultiArr := uniq(multiWindowArr)
             For e, v in uniqMultiArr 
@@ -98,11 +105,9 @@ SetTitleMatchMode, 2
                 WinGet, this_PID, PID, %this_id%
                 If (this_class = "MozillaWindowClass") 
                 {
-                    Run cmd.exe /c start nircmd.exe changeappvolume chrome.exe -0.1 ,,Hide
                     multiWinCounter += 1
                     multiWindowArr.Push(this_PID)
                 }
-            return
             }
             uniqMultiArr := uniq(multiWindowArr)
             For e, v in uniqMultiArr 
