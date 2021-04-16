@@ -23,7 +23,7 @@ SetTitleMatchMode, 2
 
 ;FireFox
 
-;Firefox Alt Account 
+;Firefox Alt Account Main Monitor
     F23::    
         SetWinDelay, 80     
         IfWinExist, ahk_class MozillaWindowClass
@@ -76,7 +76,7 @@ SetTitleMatchMode, 2
             WinMaximize, A
             Return
         }       
-;Firefox Default Account    
+;Firefox Default Account Main Monitor  
     F24::
         SetWinDelay, 80     
         IfWinExist, ahk_class MozillaWindowClass
@@ -128,9 +128,117 @@ SetTitleMatchMode, 2
             WinMove, A,, 0, 0,
             WinMaximize, A
             Return
+        }
+
+;Firefox Alt Account 2nd Monitor
+    ^F23::    
+        SetWinDelay, 80     
+        IfWinExist, ahk_class MozillaWindowClass
+        {
+            multiWindowArr := []
+            multiWinCounter := 0
+            WinGet,Windows,List
+            Loop,%Windows%
+            {
+                this_id := "ahk_id " . Windows%A_Index%
+                WinGetTitle, this_title, %this_id%
+                WinGetClass, this_class, %this_id%
+                WinGet, this_PID, PID, %this_id%
+                If (this_class = "MozillaWindowClass") 
+                {
+                    multiWinCounter += 1
+                    multiWindowArr.Push(this_PID)
+                }
+            }
+            uniqMultiArr := uniq(multiWindowArr)
+            Run, "C:\Program Files\Mozilla Firefox\firefox.exe" -p HifiVox
+            Sleep, 200
+            WinWaitActive, Mozilla Firefox
+            WinGet, firefoxPID, PID, A
+            For e, v in uniqMultiArr 
+            {
+                If (v = firefoxPID) {
+                    WinClose, A
+                    WinActivate, ahk_pid %firefoxPID%
+                    Run cmd.exe /c start firefox.exe -p HifiVox -new-tab www.google.com  ,,Hide
+                }
+            } 
+        }
+        IfWinNotExist, ahk_class MozillaWindowClass 
+        {
+            Run, "C:\Program Files\Mozilla Firefox\firefox.exe" -p HifiVox
+            Sleep, 200
+            WinWaitActive, Mozilla Firefox
         }  
+        WinGet,WinState,MinMax, A
+        WinGetPos, activeX, ActiveY
+        If (WinState = 1)
+        {
+            WinMove, A,, -1052, -2167
+            Return
+        }
+        If (WinState != 1)
+        {         
+            WinMove, A,, -400, -400,
+            WinMaximize, A
+            Return
+        }       
+;Firefox Default Account 2nd Monitor  
+    ^F24::
+        SetWinDelay, 80     
+        IfWinExist, ahk_class MozillaWindowClass
+        {
+            multiWindowArr := []
+            multiWinCounter := 0
+            WinGet,Windows,List
+            Loop,%Windows%
+            {
+                this_id := "ahk_id " . Windows%A_Index%
+                WinGetTitle, this_title, %this_id%
+                WinGetClass, this_class, %this_id%
+                WinGet, this_PID, PID, %this_id%
+                If (this_class = "MozillaWindowClass") 
+                {
+                    multiWinCounter += 1
+                    multiWindowArr.Push(this_PID)
+                }
+            }
+            uniqMultiArr := uniq(multiWindowArr)
+            Run, "C:\Program Files\Mozilla Firefox\firefox.exe" -p default-release
+            Sleep, 200
+            WinWaitActive, Mozilla Firefox
+            WinGet, firefoxPID, PID, A
+            For e, v in uniqMultiArr 
+            {
+                If (v = firefoxPID) {
+                    WinClose, A
+                    WinActivate, ahk_pid %firefoxPID%
+                    Run cmd.exe /c start firefox.exe -p default-release -new-tab www.google.com  ,,Hide
+                }
+            } 
+        }
+        IfWinNotExist, ahk_class MozillaWindowClass 
+        {
+            Run, "C:\Program Files\Mozilla Firefox\firefox.exe" -p default-release
+            Sleep, 200
+            WinWaitActive, Mozilla Firefox
+        }  
+        WinGet,WinState,MinMax, A
+        WinGetPos, activeX, ActiveY
+        If (WinState = 1)
+        {
+            WinMove, A,, -1052, -2167
+            Return
+        }
+        If (WinState != 1)
+        {         
+            WinMove, A,, -400, -400,
+            WinMaximize, A
+            Return
+        }
+
 ;Steam main account
-    +F24::
+    +F13::
         IfWinExist, Steam 
         {
             Process, close, steam.exe
@@ -144,7 +252,7 @@ SetTitleMatchMode, 2
         }
         return
 ;Steam Alt
-    +F23::
+    +F14::
         IfWinExist, Steam 
         {
             Process, close, steam.exe
