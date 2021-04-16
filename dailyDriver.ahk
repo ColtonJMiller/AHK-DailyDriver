@@ -1,8 +1,20 @@
 SetTitleMatchMode, 2
 #Include, Functions.ahk
 
+;All active Windows
+    +^!K::
+        WinGet,Windows,List
+        Loop,%Windows%
+        {
+            this_id := "ahk_id " . Windows%A_Index%
+            WinGetTitle, this_title, %this_id%
+            WinGetClass, this_class, %this_id%
+            WinGet, this_PID, PID, %this_id%
+            MsgBox, %this_title% %this_PID%
+        }
+
 ;Script reload
-    +!r:: 
+    +!R:: 
         MsgBox, Reloading Script dailyDriver.ahk
         Reload
         return
@@ -12,10 +24,46 @@ SetTitleMatchMode, 2
 ;FireFox
     F23::
         Run, "C:\Program Files\Mozilla Firefox\firefox.exe" -p HifiVox
-        return
+        Sleep, 200
+        WinWaitActive, Mozilla Firefox
+        WinGet,WinState,MinMax, A
+        WinGetPos, activeX, ActiveY
+        If (activeX = -8 && activeY = -8 && WinState = 1)
+        {
+            Return
+        }
+        If (WinState = 1)
+        {
+            WinMove, -8,-8
+            Return
+        }
+        If (WinState != 1)
+        {
+            WinMove, -8, -8
+            WinMaximize, A
+            Return
+        }
     F24::
         Run, "C:\Program Files\Mozilla Firefox\firefox.exe" -p default-release
-        return
+        Sleep, 200
+        WinWaitActive, Mozilla Firefox
+        WinGet,WinState,MinMax, A
+        WinGetPos, activeX, ActiveY
+        If (activeX = -8 && activeY = -8 && WinState = 1)
+        {
+            Return
+        }
+        If (WinState = 1)
+        {
+            WinMove, -8,-8
+            Return
+        }
+        If (WinState != 1)
+        {
+            WinMove, -8, -8
+            WinMaximize, A
+            Return
+        }
 ;Steam main account
     +F24::
         IfWinExist, Steam 
