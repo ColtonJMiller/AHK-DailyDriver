@@ -21,25 +21,16 @@ SetTitleMatchMode, 2
 
 ; Application Sizing and movement
 
-;Second monitor active window send    
-    +^Up::
-        WinMove, A,, -8, -8, [Width, Height, ExcludeTitle, ExcludeText]
-
-
 ; Application Run/Kill handling
 
 ;FireFox
-
-;switch for firefox Window
-    activeSwitchAlt := 0
-    activeSwitchMain := 0
 ;Firefox Alt Account Main Monitor
     F23:: 
-        RunWait, cmd.exe /c start firefox.exe -p HifiVox -new-tab www.google.com  ,,Hide 
+        RunWait, cmd.exe /c start firefox.exe -p HifiVox -new-tab about:home  ,,Hide 
         return
 ;Firefox Default Account Main Monitor  
     F24::
-        RunWait, cmd.exe /c start firefox.exe -p default-release -new-tab www.google.com  ,,Hide 
+        RunWait, cmd.exe /c start firefox.exe -p default-release -new-tab about:home  ,,Hide 
         return
 ;Steam main account
     +F13::
