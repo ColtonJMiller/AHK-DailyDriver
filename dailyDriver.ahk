@@ -21,6 +21,10 @@ SetTitleMatchMode, 2
 
 ; Application Sizing and movement
 
+
+
+
+
 ; Application Run/Kill handling
 
 ;FireFox
@@ -65,10 +69,10 @@ SetTitleMatchMode, 2
 
 ;focused application volume
     F13::
-        Run cmd.exe /c start nircmd.exe changeappvolume focused -0.1 ,,Hide
+        Run cmd.exe /c start nircmd.exe changeappvolume focused -0.05 ,,Hide
         return
     F14::
-        Run cmd.exe /c start nircmd.exe changeappvolume focused +0.1 ,,Hide
+        Run cmd.exe /c start nircmd.exe changeappvolume focused +0.05 ,,Hide
         return
 
 ;Browser volume control
@@ -96,13 +100,13 @@ SetTitleMatchMode, 2
             uniqMultiArr := uniq(multiWindowArr)
             For e, v in uniqMultiArr 
             {
-                Run cmd.exe /c start nircmd.exe changeappvolume /%v% +0.1 ,,Hide
+                Run cmd.exe /c start nircmd.exe changeappvolume /%v% +0.05 ,,Hide
             }    
         }
         ;Check for active Google Chrome
         IfWinExist, Google Chrome
         {
-            Run cmd.exe /c start nircmd.exe changeappvolume chrome.exe +0.1 ,,Hide
+            Run cmd.exe /c start nircmd.exe changeappvolume chrome.exe +0.05 ,,Hide
         }
         return
 ;Browser Volume down
@@ -128,25 +132,59 @@ SetTitleMatchMode, 2
             uniqMultiArr := uniq(multiWindowArr)
             For e, v in uniqMultiArr 
             {
-                Run cmd.exe /c start nircmd.exe changeappvolume /%v% -0.1 ,,Hide
+                Run cmd.exe /c start nircmd.exe changeappvolume /%v% -0.05 ,,Hide
             }    
         }
         ;Check for active Google Chrome
         IfWinExist, Google Chrome
         {
-            Run cmd.exe /c start nircmd.exe changeappvolume chrome.exe -0.1 ,,Hide
+            Run cmd.exe /c start nircmd.exe changeappvolume chrome.exe -0.05 ,,Hide
         }
         return
-;Line in volume up
+
+;Music apps volume control
+;music app volume up    
+    F18::
+        IfWinExist, TIDAL
+        {
+            Run cmd.exe /c start nircmd.exe changeappvolume TIDAL.exe +0.05 ,,Hide            
+        }
+        IfWinExist, Spotify
+        {
+            Run cmd.exe /c start nircmd.exe changeappvolume Spotify.exe +0.05 ,,Hide            
+        }
+        Return
+;music app volume down    
     F17::
+        IfWinExist, TIDAL
+        {
+            Run cmd.exe /c start nircmd.exe changeappvolume TIDAL.exe -0.05 ,,Hide            
+        }
+        IfWinExist, Spotify
+        {
+            Run cmd.exe /c start nircmd.exe changeappvolume Spotify.exe -0.05 ,,Hide            
+        }
+        Return
+;Line in volume control
+;Line in volume up
+    F19::
+        IfWinExist, Audacity
+        {
+            Run cmd.exe /c start nircmd.exe changeappvolume Audacity.exe -0.05 ,,Hide            
+        }
         IfWinExist, VoiceMeeter 
         {
-            Run cmd.exe /c start nircmd.exe changeappvolume Voicemeeter.exe -0.1 ,,Hide            
+            Run cmd.exe /c start nircmd.exe changeappvolume Voicemeeter.exe -0.05 ,,Hide 
+
         }
         return  
-    F18::  
+    F20::  
+        IfWinExist, Audacity
+        {
+            Run cmd.exe /c start nircmd.exe changeappvolume Audacity.exe +0.05 ,,Hide            
+        }
         IfWinExist, VoiceMeeter 
         {
-            Run cmd.exe /c start nircmd.exe changeappvolume Voicemeeter.exe +0.1 ,,Hide            
+            Run cmd.exe /c start nircmd.exe changeappvolume Voicemeeter.exe +0.05 ,,Hide            
         } 
         return     
