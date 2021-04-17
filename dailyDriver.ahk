@@ -43,12 +43,14 @@ SetTitleMatchMode, 2
     +F13::
         IfWinExist, Steam 
         {
+            MsgBox, Starting Main Steam
             Process, close, steam.exe
             ;location of .bat must be changed
             Run, "C:\Users\Colto\Documents\SteamMain.bat" ,,Hide
         }
         IfWinNotExist, Steam
         {
+            MsgBox, Starting Main Steam
             ;location of .bat must be changed
             Run, "C:\Users\Colto\Documents\SteamMain.bat" ,,Hide
         }
@@ -57,12 +59,14 @@ SetTitleMatchMode, 2
     +F14::
         IfWinExist, Steam 
         {
+            MsgBox, Starting Alt Steam
             Process, close, steam.exe
             ;location of .bat must be changed
             Run, "C:\Users\Colto\Documents\SteamPBX.bat" ,,Hide
         }
         IfWinNotExist, Steam 
         {
+            MsgBox, Starting Alt Steam
             ;location of .bat must be changed
             Run, "C:\Users\Colto\Documents\SteamPBX.bat" ,,Hide
         }
