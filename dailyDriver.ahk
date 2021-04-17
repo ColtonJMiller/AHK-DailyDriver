@@ -1,5 +1,8 @@
 SetTitleMatchMode, 2
 #Include, Functions.ahk
+;temp test hotkey
+
+
 ;All active Windows
     +^!K::
         WinGet,Windows,List
@@ -75,11 +78,11 @@ SetTitleMatchMode, 2
         Run cmd.exe /c start nircmd.exe changeappvolume focused +0.05 ,,Hide
         return
 
-;Browser volume control
+;Media volume control (includes browser tabs with audio)
 
-;Browser Volume up 
+;Media Volume up 
     F16::
-        ;Check for active Firefox
+;Check for active Firefox
         IfWinExist, ahk_class MozillaWindowClass
         {
             multiWindowArr := []
@@ -103,15 +106,24 @@ SetTitleMatchMode, 2
                 Run cmd.exe /c start nircmd.exe changeappvolume /%v% +0.05 ,,Hide
             }    
         }
-        ;Check for active Google Chrome
+;Check for active Google Chrome
         IfWinExist, Google Chrome
         {
             Run cmd.exe /c start nircmd.exe changeappvolume chrome.exe +0.05 ,,Hide
         }
-        return
-;Browser Volume down
+;music app volume up    
+        IfWinExist, TIDAL
+        {
+            Run cmd.exe /c start nircmd.exe changeappvolume TIDAL.exe +0.05 ,,Hide            
+        }
+        IfWinExist, Spotify
+        {
+            Run cmd.exe /c start nircmd.exe changeappvolume Spotify.exe +0.05 ,,Hide            
+        }
+        Return
+;Media Volume down
     F15::
-        ;Check for active Firefox
+;Check for active Firefox
         IfWinExist, ahk_class MozillaWindowClass
         {
             multiWindowArr := []
@@ -135,27 +147,11 @@ SetTitleMatchMode, 2
                 Run cmd.exe /c start nircmd.exe changeappvolume /%v% -0.05 ,,Hide
             }    
         }
-        ;Check for active Google Chrome
+;Check for active Google Chrome
         IfWinExist, Google Chrome
         {
             Run cmd.exe /c start nircmd.exe changeappvolume chrome.exe -0.05 ,,Hide
         }
-        return
-
-;Music apps volume control
-;music app volume up    
-    F18::
-        IfWinExist, TIDAL
-        {
-            Run cmd.exe /c start nircmd.exe changeappvolume TIDAL.exe +0.05 ,,Hide            
-        }
-        IfWinExist, Spotify
-        {
-            Run cmd.exe /c start nircmd.exe changeappvolume Spotify.exe +0.05 ,,Hide            
-        }
-        Return
-;music app volume down    
-    F17::
         IfWinExist, TIDAL
         {
             Run cmd.exe /c start nircmd.exe changeappvolume TIDAL.exe -0.05 ,,Hide            
@@ -165,9 +161,16 @@ SetTitleMatchMode, 2
             Run cmd.exe /c start nircmd.exe changeappvolume Spotify.exe -0.05 ,,Hide            
         }
         Return
+
+;Music apps volume control
+
+;Moved to universal media controls may implement independant controls with more physical buttons available
+
+;music app volume down    
 ;Line in volume control
 ;Line in volume up
-    F19::
+    F17::
+        Run cmd.exe /c start nircmd.exe changeappvolume "Adobe Audition CC.exe" -0.05 ,,Hide             
         IfWinExist, Audacity
         {
             Run cmd.exe /c start nircmd.exe changeappvolume Audacity.exe -0.05 ,,Hide            
@@ -178,7 +181,8 @@ SetTitleMatchMode, 2
 
         }
         return  
-    F20::  
+    F18::  
+        Run cmd.exe /c start nircmd.exe changeappvolume "Adobe Audition CC.exe" +0.05 ,,Hide             
         IfWinExist, Audacity
         {
             Run cmd.exe /c start nircmd.exe changeappvolume Audacity.exe +0.05 ,,Hide            
