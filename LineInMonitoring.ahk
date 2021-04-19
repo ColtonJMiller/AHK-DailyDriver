@@ -1,9 +1,6 @@
 DetectHiddenWindows, on
 auditionID := ""
-    +^F22::
-        WinShow, ahk_exe Adobe Audition CC.exe
-        Return
-    +^F21::
+    <+F24::
         currentActive := WinExist("A")
         IfWinNotExist, ahk_exe Adobe Audition CC.exe
         {
@@ -36,4 +33,7 @@ auditionID := ""
             WinHide, ahk_exe Adobe Audition CC.exe
             Return        
         }
+        Return
+    <+F23::
+        WinShow, ahk_exe Adobe Audition CC.exe
         Return

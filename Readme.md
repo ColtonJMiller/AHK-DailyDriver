@@ -1,0 +1,1 @@
+Basic project utilizing AutoHotKey along with nircmd to simplify common tasks and allow for better accessability without use of a monitor. 
