@@ -1,3 +1,4 @@
+#NoTrayIcon
 DetectHiddenWindows, on
 auditionID := ""
     <+F24::

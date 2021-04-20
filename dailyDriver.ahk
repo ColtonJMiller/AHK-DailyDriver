@@ -1,61 +1,177 @@
+;Koolertron 23 key
+;R3 Macros
+;M1 = >^F19 
+;M2 = >^F20 
+;M3 = >^F21 
+;M4 = >^F22 
+;M5 = >^F23 
+;M6 = >^F24 
+;R4 Binds
+;C1 = <+ LT SHIFT
+;C2 = <^ LT CTRL
+;C3 = <! LT ALT
+;C4 = >! RT ALT
+;C5/6 = >+ RT SHIFT
+
 SetTitleMatchMode, 2
 #Include, Functions.ahk
+
 ;temp test hotkey
 
+; Open hotkey sheet
+    <+<^<!H::
+        IfWinExist, AHK-DailyDriver hotkey mapping
+        {
+            sheetId := WinExist("AHK-DailyDriver hotkey mapping")
+            WinActivate, ahk_id %sheetId%
+        }
+        IfWinNotExist, AHK-DailyDriver hotkey mapping
+        {
+            RunWait, cmd.exe /c start firefox.exe -p default-release -new-tab https://docs.google.com/spreadsheets/d/1eRfcNj-UR4kXf5fBXDS4rn95YMSlbbT8McJL3HkK-_A/edit ,,Hide 
+        }    
+        Return
 ;All active Windows
-    +^!K::
+    <+<^!K::
         WinGet,Windows,List
+        MsgBox, %Windows%
         Loop,%Windows%
         {
             this_id := "ahk_id " . Windows%A_Index%
             WinGetTitle, this_title, %this_id%
             WinGetClass, this_class, %this_id%
             WinGet, this_PID, PID, %this_id%
-            MsgBox, %this_title% %this_PID%
+            MsgBox, Title = %this_title%`n Class = %this_class%`n PID = %this_PID%
         }
         Return
 
 ;Script reload
-    +!R:: 
+    <+<!R:: 
         MsgBox, Reloading Script dailyDriver.ahk
         Reload
         return
-
-;Application open and make active
-
-    ;Firefox Default Account make active
-        >^F19::
+;Application location
+    ;Maximize or restore toggle for active window 
+        F22::
+            WinGet, winState, MinMax, A
+            if (winState = 0 || winState = -1 )
+            {
+                WinMaximize, A
+                return
+            }
+            If (winState = 1)
+            {
+                WinRestore, A
+                Return
+            }
+    ;Minimize active window   
+        F21::
+            WinGet, winState, MinMax, A
+            If (winState = 1 || winState = 0)
+            {
+                WinMinimize, A
+                Return
+            }
+            If (winState = -1)
+            {
+                Return
+            }
+    ;Move active window to other monitor
+        F24::
+            Send, {LWinDown}{ShiftDown}{Left}{ShiftUp}{LWinUp}
+            Return
+;Application process kill  
+    ;Kill current active process
+        <+F14::
+            current := WinExist("A")
+            WinGet, currentPID, PID, %current%
+            WinClose ahk_id %current%
+            Return
+;FireFox new tab per profile
+    ;Firefox Default Account open new tab
+        >+>^F19::
             IfWinExist, -Main-
             {
-                WinGet,ffMainActive,ID, -Main-
-                WinActivate, ahk_id %ffMainActive%
+                RunWait, cmd.exe /c start firefox.exe -p default-release -new-tab about:home ,,Hide
                 Return
             }
             IfWinNotExist, -Main-
             {
-                RunWait, cmd.exe /c start firefox.exe -p default-release ,,Hide
+                RunWait, cmd.exe /c start firefox.exe -p default-release -new-tab about:home ,,Hide
+                Return
+            }            
+    ;Firefox Alt Account open new tab
+        >+>^F20::
+            IfWinExist, -Hifi-
+            {
+                RunWait, cmd.exe /c start firefox.exe -p HifiVox -new-tab about:home ,,Hide
+                Return
+            }
+            IfWinNotExist, -Hifi-
+            {
+                RunWait, cmd.exe /c start firefox.exe -p HifiVox -new-tab about:home ,,Hide
+                Return
+            } 
+;Application open and make active
+    ;Firefox Default Account make active
+        >^F19::
+            IfWinExist, -Main-
+            {
+                WinGet, ffActive, ID, -Main-
+                currActive := WinExist("A")              
+                If (currActive = ffActive)
+                {
+                    Send, {Ctrl Down}{PgDn}{Ctrl Up} 
+                    return                  
+                }
+                Else 
+                {
+                    WinActivate, ahk_id %ffActive%
+                    Return
+                }
+            }
+            IfWinNotExist, -Main-
+            {
+                RunWait, cmd.exe /c start firefox.exe -p default-release -new-tab about:home ,,Hide
                 Return
             } 
     ;Firefox Alt Account make active
         >^F20:: 
             IfWinExist, -Hifi-
             {
-                WinGet,ffAltActive,ID, -Hifi-
-                WinActivate, ahk_id %ffAltActive%
-                Return
+                WinGet, ffActive, ID, -Hifi-
+                currActive := WinExist("A")              
+                If (currActive = ffActive)
+                {
+                    Send, {Ctrl Down}{PgDn}{Ctrl Up} 
+                    return                  
+                }
+                Else 
+                {
+                    WinActivate, ahk_id %ffActive%
+                    Return
+                }
             }
             IfWinNotExist, -Hifi-
             {
-                RunWait, cmd.exe /c start firefox.exe -p HifiVox ,,Hide
+                RunWait, cmd.exe /c start firefox.exe -p HifiVox -new-tab about:home ,,Hide
                 Return
             } 
     ;Visual Studio
         >^F21::
             IfWinExist, ahk_exe Code.exe
             {
-                WinGet,vsCodeActive,ID, ahk_exe Code.exe
-                WinActivate, ahk_id %vsCodeActive%
-                Return
+                WinGet, ffActive, ID, ahk_exe code.exe
+                currActive := WinExist("A")              
+                If (currActive = ffActive)
+                {
+                    Send, {Ctrl Down}{PgDn}{Ctrl Up} 
+                    return                  
+                }
+                Else 
+                {
+                    WinActivate, ahk_id %ffActive%
+                    Return
+                }
             }
             IfWinNotExist, ahk_exe Code.exe
             {
@@ -105,37 +221,35 @@ SetTitleMatchMode, 2
         >^F24::
             IfWinExist, ahk_exe steam.exe
             {
-                MsgBox,,, Starting Main Steam, 3
-                Process, close, steam.exe
-                ;location of .bat must be changed
-                Run, "C:\Users\Colto\Documents\SteamMain.bat" ,,Hide
+                WinGet, steamID, ID, Steam
+                WinActivate, ahk_id %steamID%
                 Return
             }
             IfWinNotExist, ahk_exe steam.exe
             {
-                MsgBox,,, Starting Alt Steam, 3
+                MsgBox,,, Starting Main Steam, 2
+                Process, close, steam.exe
                 ;location of .bat must be changed
                 Run, "C:\Users\Colto\Documents\SteamMain.bat" ,,Hide
-                Return
             }
-
+            return
     ;Steam Alt
         >+>^F24::
             IfWinExist, ahk_exe steam.exe
             {
-                MsgBox, Starting Alt Steam
+                WinGet, steamID, ID, Steam
+                WinActivate, ahk_id %steamID%
+                Return
+            }
+            IfWinNotExist, ahk_exe steam.exe 
+            {
+                MsgBox,,, Starting Alt Steam, 2
                 Process, close, steam.exe
                 ;location of .bat must be changed
                 Run, "C:\Users\Colto\Documents\SteamPBX.bat" ,,Hide
                 Return
             }
-            IfWinNotExist, ahk_exe steam.exe 
-            {
-                MsgBox, Starting Alt Steam
-                ;location of .bat must be changed
-                Run, "C:\Users\Colto\Documents\SteamPBX.bat" ,,Hide
-                Return
-            }
+            Return
     ;Koolertron Editor
         >+F24::
             IfWinExist, AMAKeyboardClient
@@ -151,6 +265,20 @@ SetTitleMatchMode, 2
             } 
 ;Volume Controls
 
+    ;main system volume 2%
+        F19::
+            SoundSet -2 
+            Return
+        F20::
+            SoundSet +2
+            Return       
+    ;main system volume 5%
+        >+F19::
+            SoundSet -5
+            Return
+        >+F20::
+            SoundSet +5
+            Return
     ;focused application volume 2%
         F13::
             Run cmd.exe /c start nircmd.exe changeappvolume focused -0.02 ,,Hide
@@ -196,11 +324,12 @@ SetTitleMatchMode, 2
             {
                 Run cmd.exe /c start nircmd.exe changeappvolume chrome.exe -0.02 ,,Hide
             }
-            IfWinExist, TIDAL
+            IfWinExist, ahk_exe TIDAL.exe
             {
-                Run cmd.exe /c start nircmd.exe changeappvolume TIDALPlayer.exe -0.02 ,,Hide            
+                Run cmd.exe /c start nircmd.exe changeappvolume TIDAL.exe -0.02 ,,Hide               
+                Run cmd.exe /c start nircmd.exe changeappvolume TIDALPlayer.exe -0.02 ,,Hide         
             }
-            IfWinExist, Spotify
+            IfWinExist, ahk_exe Spotify.exe
             {
                 Run cmd.exe /c start nircmd.exe changeappvolume Spotify.exe -0.02 ,,Hide            
             }
@@ -235,11 +364,11 @@ SetTitleMatchMode, 2
             {
                 Run cmd.exe /c start nircmd.exe changeappvolume chrome.exe +0.02 ,,Hide
             } 
-            IfWinExist, TIDAL
+            IfWinExist, ahk_exe TIDAL.exe
             {
                 Run cmd.exe /c start nircmd.exe changeappvolume TIDALPlayer.exe +0.02 ,,Hide            
             }
-            IfWinExist, Spotify
+            IfWinExist, ahk_exe Spotify.exe
             {
                 Run cmd.exe /c start nircmd.exe changeappvolume Spotify.exe +0.02 ,,Hide            
             }
@@ -275,7 +404,7 @@ SetTitleMatchMode, 2
             {
                 Run cmd.exe /c start nircmd.exe changeappvolume chrome.exe -0.1 ,,Hide
             }
-            IfWinExist, TIDAL
+            IfWinExist, ahk_exe TIDAL.exe
             {
                 Run cmd.exe /c start nircmd.exe changeappvolume TIDALPlayer.exe -0.1 ,,Hide            
             }
@@ -314,7 +443,7 @@ SetTitleMatchMode, 2
             {
                 Run cmd.exe /c start nircmd.exe changeappvolume chrome.exe +0.1 ,,Hide
             } 
-            IfWinExist, TIDAL
+            IfWinExist, ahk_exe TIDAL.exe
             {
                 Run cmd.exe /c start nircmd.exe changeappvolume TIDALPlayer.exe +0.1 ,,Hide            
             }
