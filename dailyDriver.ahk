@@ -16,7 +16,6 @@
 SetTitleMatchMode, 2
 #Include, Functions.ahk
 
-;Hotkey variables
 
 ;HOTKEYS One time helper keys
     ; Open hotkey sheet
