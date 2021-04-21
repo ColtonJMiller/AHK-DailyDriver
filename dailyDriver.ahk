@@ -83,95 +83,179 @@ SetTitleMatchMode, 2
     ;Kill current active process
         <+F14::
             current := WinExist("A")
+            WinGetClass, this_class, ahk_id %current%
+            WinGetTitle, this_title, ahk_id %current%
+            If (this_class = "MozillaWindowClass")
+            {
+                Send, {CtrlDown}{F4}{CtrlUp}
+                Return
+            }
+            If (this_title ~= "Visual Studio Code")
+            {
+                Send, {CtrlDown}{F4}{CtrlUp}
+                Return
+            }
+            If (this_class = "Chrome_WidgetWin_1")
+            {
+                Send, {CtrlDown}{F4}{CtrlUp}
+                Return
+            }
             WinGet, currentPID, PID, %current%
             WinClose ahk_id %current%
             Return
 ;FireFox new tab per profile
+    
     ;Firefox Default Account open new tab
         >+>^F19::
-            IfWinExist, -Main-
-            {
-                RunWait, cmd.exe /c start firefox.exe -p default-release -new-tab about:home ,,Hide
-                Return
-            }
-            IfWinNotExist, -Main-
-            {
-                RunWait, cmd.exe /c start firefox.exe -p default-release -new-tab about:home ,,Hide
-                Return
-            }            
+            profile := "-Main-" 
+            profileName := "default-release"
+            WinGet, this_ID, ID, %profile%
+            Runwait, cmd.exe /c start firefox.exe -p %profileName% -new-tab about:home ,,Hide
+            WinWaitClose, 
+            WinActivate, ahk_id %this_ID%
+            Return        
     ;Firefox Alt Account open new tab
         >+>^F20::
-            IfWinExist, -Hifi-
-            {
-                RunWait, cmd.exe /c start firefox.exe -p HifiVox -new-tab about:home ,,Hide
-                Return
-            }
-            IfWinNotExist, -Hifi-
-            {
-                RunWait, cmd.exe /c start firefox.exe -p HifiVox -new-tab about:home ,,Hide
-                Return
-            } 
+            profile := "-Hifi-" 
+            profileName := "HifiVox"
+            WinGet, this_ID, ID, %profile%
+            Runwait, cmd.exe /c start firefox.exe -p %profileName% -new-tab about:home ,,Hide
+            WinWaitClose, 
+            WinActivate, ahk_id %this_ID%
+            Return   
+;Chrome new tab per profile    
+    ;Chrome Main Account open new tab
+        <^>^F19::
+            profile := "|Main|" 
+            profileName := "default"
+            WinGet, this_ID, ID, %profile%
+            Runwait, cmd.exe /c start chrome.exe --args --profile-directory=%profileName% www.google.com  ,,Hide
+            WinWaitClose, 
+            WinActivate, ahk_id %this_ID%
+            Return 
+    ;Chrome Work Account open new tab
+        <^>^F20::
+            profile := "|Work|" 
+            profileName := """profile 1"""
+            WinGet, this_ID, ID, %profile%
+            Runwait, cmd.exe /c start chrome.exe --args --profile-directory=%profileName% www.google.com  ,,Hide
+            WinWaitClose, 
+            WinActivate, ahk_id %this_ID%
+            Return 
 ;Application open and make active
-    ;Firefox Default Account make active
+    ;Firefox Default Account make active/cycle tabs
         >^F19::
-            IfWinExist, -Main-
+            profile := "-Main-" 
+            profileName := "default-release"
+            IfWinExist, %profile%
             {
-                WinGet, ffActive, ID, -Main-
+                WinGet, actCheck, ID, %profile%
                 currActive := WinExist("A")              
-                If (currActive = ffActive)
+                If (currActive = actCheck)
                 {
                     Send, {Ctrl Down}{PgDn}{Ctrl Up} 
                     return                  
                 }
                 Else 
                 {
-                    WinActivate, ahk_id %ffActive%
+                    WinActivate, ahk_id %actCheck%
                     Return
                 }
             }
-            IfWinNotExist, -Main-
+            IfWinNotExist, %profile%
             {
-                RunWait, cmd.exe /c start firefox.exe -p default-release -new-tab about:home ,,Hide
+                Run, cmd.exe /c start firefox.exe -p %profileName% -new-tab about:home ,,Hide
+                WinWait, %profileName%
                 Return
             } 
-    ;Firefox Alt Account make active
-        >^F20:: 
-            IfWinExist, -Hifi-
+            Return
+    ;Firefox Alt Account make active/cycle tabs
+        >^F20::
+            profile := "-Hifi-" 
+            profileName := "HifiVox"
+            IfWinExist, %profile%
             {
-                WinGet, ffActive, ID, -Hifi-
+                WinGet, actCheck, ID, %profile%
                 currActive := WinExist("A")              
-                If (currActive = ffActive)
+                If (currActive = actCheck)
                 {
                     Send, {Ctrl Down}{PgDn}{Ctrl Up} 
                     return                  
                 }
                 Else 
                 {
-                    WinActivate, ahk_id %ffActive%
+                    WinActivate, ahk_id %actCheck%
                     Return
                 }
             }
-            IfWinNotExist, -Hifi-
+            IfWinNotExist, %profile%
             {
-                RunWait, cmd.exe /c start firefox.exe -p HifiVox -new-tab about:home ,,Hide
+                Run, cmd.exe /c start firefox.exe -p %profileName% -new-tab about:home ,,Hide
+                WinWait, %profileName%
                 Return
             } 
+            Return
+    ;Chrome Main Account make active/cycle tabs
+        <+>^F19::
+            profile := "|Main|"
+            profileName := "Default"
+            IfWinExist,  %profile%
+            {
+                WinGet, actCheck, ID, %profile%
+                currActive := WinExist("A")              
+                If (currActive = actCheck)
+                {
+                    Send, {Ctrl Down}{Tab}{Ctrl Up} 
+                    return                  
+                }
+                Else 
+                {
+                    WinActivate, ahk_id %actCheck%
+                    Return
+                }
+                WinActivate, ahk_id %mainAct%
+                return           
+            }
+            IfWinNotExist, %profile% 
+            {
+                Run, cmd.exe /c start chrome.exe --args --profile-directory=%profileName%  ,,Hide
+                WinWait, %profile%
+                Return                
+            }           
+    ;Chrome Work Account make active/cycle tabs
+        <+>^F20::
+            profile := "|Work|"
+            profileName := """profile 1"""
+            IfWinExist,  %profile%
+            {
+                WinGet, actCheck, ID, %profile%
+                currActive := WinExist("A")              
+                If (currActive = actCheck)
+                {
+                    Send, {Ctrl Down}{Tab}{Ctrl Up} 
+                    return                  
+                }
+                Else 
+                {
+                    WinActivate, ahk_id %actCheck%
+                    Return
+                }
+                WinActivate, ahk_id %mainAct%
+                return           
+            }
+            IfWinNotExist, %profile% 
+            {
+                Run, cmd.exe /c start chrome.exe --args --profile-directory=%profileName%  ,,Hide
+                WinWait, %profile%
+                Return                
+            }  
     ;Visual Studio
         >^F21::
             IfWinExist, ahk_exe Code.exe
             {
                 WinGet, ffActive, ID, ahk_exe code.exe
-                currActive := WinExist("A")              
-                If (currActive = ffActive)
-                {
-                    Send, {Ctrl Down}{PgDn}{Ctrl Up} 
-                    return                  
-                }
-                Else 
-                {
-                    WinActivate, ahk_id %ffActive%
-                    Return
-                }
+                WinActivate, ahk_id %ffActive%
+                Return
             }
             IfWinNotExist, ahk_exe Code.exe
             {
@@ -208,9 +292,18 @@ SetTitleMatchMode, 2
         >^F23::
             IfWinExist, ahk_exe photoshop.exe
             {
-                WinGet,psActive,ID, ahk_exe C:\Program Files\Adobe\Adobe Photoshop 2020\photoshop.exe
-                WinActivate, ahk_id %psActive%
-                Return
+                WinGet, PSActive, ID, ahk_exe C:\Program Files\Adobe\Adobe Photoshop 2020\photoshop.exe
+                currActive := WinExist("A")              
+                If (currActive = PSActive)
+                {
+                    Send, {Ctrl Down}{Tab}{Ctrl Up} 
+                    return                  
+                }
+                Else 
+                {
+                    WinActivate, ahk_id %PSActive%
+                    Return
+                }
             }
             IfWinNotExist, ahk_exe photoshop.exe
             {
@@ -227,7 +320,7 @@ SetTitleMatchMode, 2
             }
             IfWinNotExist, ahk_exe steam.exe
             {
-                MsgBox,,, Starting Main Steam, 2
+                MsgBox,,, Starting Main Steam, 1
                 Process, close, steam.exe
                 ;location of .bat must be changed
                 Run, "C:\Users\Colto\Documents\SteamMain.bat" ,,Hide
@@ -243,7 +336,7 @@ SetTitleMatchMode, 2
             }
             IfWinNotExist, ahk_exe steam.exe 
             {
-                MsgBox,,, Starting Alt Steam, 2
+                MsgBox,,, Starting Alt Steam, 1
                 Process, close, steam.exe
                 ;location of .bat must be changed
                 Run, "C:\Users\Colto\Documents\SteamPBX.bat" ,,Hide
