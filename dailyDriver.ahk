@@ -16,7 +16,6 @@
 SetTitleMatchMode, 2
 #Include, Functions.ahk
 
-
 ;HOTKEYS One time helper keys
     ; Open hotkey sheet
         SheetHK := "<+<^<!H"
@@ -75,6 +74,9 @@ SetTitleMatchMode, 2
     ;Koolertron Editor active/open
         koolertronOpenHK := ">+F24"
         hotkey, %koolertronOpenHK%, koolertronOpenLab
+    ;Volume mixer open/make active
+        volMixOpenHK := "F23"
+        hotkey, %volMixOpenHK%, volMixOpenLab  
 ;HOTKEYS Applications new tabs
     ;Firefox Default Account open new tab
         ffNewTabMainHK := ">+>^F19"
@@ -125,12 +127,12 @@ SetTitleMatchMode, 2
     ;Media volume control (firefox,chrome,tidal,and spotify) up 5%
         mediaVolUp5HK := ">+F16"
         hotkey, %mediaVolUp5HK%, mediaVolUp5Lab
-    ;Line in volume control down 2%
-        lineVolDown2HK := "F17"
-        hotkey, %lineVolDown2HK%, lineVolDown2Lab
-    ;Line in volume control up 2%
-        lineVolUp2HK := "F18"
-        hotkey, %lineVolUp2HK%, lineVolUp2Lab
+    ;Line in volume control down 1%
+        lineVolDown1HK := "F17"
+        hotkey, %lineVolDown1HK%, lineVolDown1Lab
+    ;Line in volume control up 1%
+        lineVolUp1HK := "F18"
+        hotkey, %lineVolUp1HK%, lineVolUp1Lab
     ;Line in volume control down 5%
         lineVolDown5HK := ">+F17"
         hotkey, %lineVolDown5HK%, lineVolDown5Lab
@@ -251,7 +253,7 @@ Return
             IfWinNotExist, %profile%
             {
                 Run, cmd.exe /c start firefox.exe -p %profileName% -new-tab about:home ,,Hide
-                WinWait, %profileName%
+                WinWait, %profile%
                 Return
             } 
             Return
@@ -278,7 +280,7 @@ Return
             IfWinNotExist, %profile%
             {
                 Run, cmd.exe /c start firefox.exe -p %profileName% -new-tab about:home ,,Hide
-                WinWait, %profileName%
+                WinWait, %profile%
                 Return
             } 
             Return
@@ -444,6 +446,13 @@ Return
                 Run, "C:\Users\Colto\Documents\amag\amag\AMAG_EN\AMAG.exe" ,,Hide
                 Return
             }
+    ;Volume mixer open/make active
+        volMixOpenLab:
+            Run C:\Windows\System32\SndVol.exe
+            WinWait, ahk_exe SndVol.exe
+            If WinExist("ahk_exe SndVol.exe")  
+                WinActivate, ahk_exe SndVol.exe
+            Return
 ;Application new tabs
     ;Firefox Default Account open new tab
         ffNewTabMainLab:
@@ -676,56 +685,34 @@ Return
                 Run cmd.exe /c start nircmd.exe changeappvolume Spotify.exe +0.05 ,,Hide            
             }
             Return
-    ;Line in volume control down 2%
-        lineVolDown2Lab:
-            Run cmd.exe /c start nircmd.exe changeappvolume "Adobe Audition CC.exe" -0.02 ,,Hide             
-            IfWinExist, Audacity
-            {
-                Run cmd.exe /c start nircmd.exe changeappvolume Audacity.exe -0.02 ,,Hide            
-            }
-            IfWinExist, VoiceMeeter 
-            {
-                Run cmd.exe /c start nircmd.exe changeappvolume Voicemeeter.exe -0.02 ,,Hide 
-
-            }
+    ;Line in volume control down 1%
+        lineVolDown1Lab:           
+            cmdLine := "\Device\HarddiskVolume10\Windows\System32\svchost.exe%b{8E19A496-3D76-4D27-8FD0-7374125873B1}"
+            Run SoundVolumeView.exe /ChangeVolume %cmdLine% -1 ,,Hide
             return 
-    ;Line in volume control up 2% 
-        lineVolUp2Lab:  
-            Run cmd.exe /c start nircmd.exe changeappvolume "Adobe Audition CC.exe" +0.02 ,,Hide             
-            IfWinExist, Audacity
-            {
-                Run cmd.exe /c start nircmd.exe changeappvolume Audacity.exe +0.02 ,,Hide            
-            }
-            IfWinExist, VoiceMeeter 
-            {
-                Run cmd.exe /c start nircmd.exe changeappvolume Voicemeeter.exe +0.02 ,,Hide            
-            } 
-            return     
-
+    ;Line in volume control up 1% 
+        lineVolUp1Lab:            
+            cmdLine := "\Device\HarddiskVolume10\Windows\System32\svchost.exe%b{8E19A496-3D76-4D27-8FD0-7374125873B1}"
+            Run SoundVolumeView.exe /ChangeVolume %cmdLine% +1 ,,Hide
+            return    
     ;Line in volume control down 5%
-        lineVolDown5Lab:
-            Run cmd.exe /c start nircmd.exe changeappvolume "Adobe Audition CC.exe" -0.05 ,,Hide             
-            IfWinExist, Audacity
-            {
-                Run cmd.exe /c start nircmd.exe changeappvolume Audacity.exe -0.05 ,,Hide            
-            }
-            IfWinExist, VoiceMeeter 
-            {
-                Run cmd.exe /c start nircmd.exe changeappvolume Voicemeeter.exe -0.05 ,,Hide 
-
-            }
+        lineVolDown5Lab:  
+            cmdLine := "\Device\HarddiskVolume10\Windows\System32\svchost.exe%b{8E19A496-3D76-4D27-8FD0-7374125873B1}"
+            Run SoundVolumeView.exe /ChangeVolume %cmdLine% -5 ,,Hide
             return 
     ;Line in volume control up 5%  
         lineVolUp5Lab:  
-            Run cmd.exe /c start nircmd.exe changeappvolume "Adobe Audition CC.exe" +0.05 ,,Hide             
-            IfWinExist, Audacity
-            {
-                Run cmd.exe /c start nircmd.exe changeappvolume Audacity.exe +0.05 ,,Hide            
-            }
-            IfWinExist, VoiceMeeter 
-            {
-                Run cmd.exe /c start nircmd.exe changeappvolume Voicemeeter.exe +0.05 ,,Hide            
-            } 
-            return   
+            cmdLine := "\Device\HarddiskVolume10\Windows\System32\svchost.exe%b{8E19A496-3D76-4D27-8FD0-7374125873B1}"
+            Run SoundVolumeView.exe /ChangeVolume %cmdLine% +5 ,,Hide
+            return 
+    ;Line in Check    
+        <+<^<!_::
+        
+            SoundGet, LineVol, Master, Volume, 6
+            SoundGet, LineWave, Wave, Volume, 6
+            MsgBox,, Line In Volume:, Current line in volume: %LineVol%`nCurrent line in wave: %LineWave%, 500
+            Return
+    
+
 
   
