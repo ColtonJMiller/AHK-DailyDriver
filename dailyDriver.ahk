@@ -15,10 +15,68 @@
 
 SetTitleMatchMode, 2
 #Include, Functions.ahk
+grabInputPID()
+{
+    tmpFile = ~~TaskListResult~~
+    RunWait %comspec% /c tasklist /svc > %tmpFile%,, Hide
+    ; Read fast and delete, may even avoid writting to disk...
+    FileRead taskList, %tmpFile%
+    FileDelete %tmpFile%
 
+    searchedImage = svchost.exe
+    searchedService = Audiosrv ; Just test value, put what you need
+    imageNameLen := StrLen(searchedImage)
+
+    Loop Parse, taskList, `n, `r
+    {
+        StringLeft imageName, A_LoopField, %imageNameLen%
+        If (imageName = searchedImage)
+        {
+            StringMid pid, A_LoopField, 29, 7
+            ;MsgBox %pid% - %A_LoopField%
+        }
+        IfInString A_LoopField, %searchedService%
+        {
+            ; /!\ I suppose the service name can be found only for the searched image
+            ; Otherwise, a stronger check must be made
+            bFound := true
+            Break
+        }
+    }
+    StringReplace, pidNoSpace, pid, %A_Space%,,All
+    If (bFound)
+    {
+        ;MsgBox Searched PID is: (%pidNoSpace%)
+    }
+    Else
+    {
+        MsgBox Oops, no PID found...
+    }
+    Return pidNoSpace
+}
+
+LineInPID := grabInputPID()
+;MsgBox, %LineInPID%
+
+;Global variables
+firstActiveHoldCount := 0
+firstActiveHoldID := ""
+secondActiveHoldCount := 0
+secondActiveHoldID := ""
 ;HOTKEYS 
+    ;HOTKEYS Media Keys 
+        ;Track control
+            ;Track Previous
+                trackPrevHK := "<+F13"
+                hotkey, %trackPrevHK%, trackPrevLab             
+            ;Track play/pause
+                trackPlayHK := "<+F15"
+                hotkey, %trackPlayHK%, trackPlayLab   
+            ;Track next 
+                trackNextHK := "<+F17"
+                hotkey, %trackNextHK%, trackNextLab 
     ;HOTKEYS One time helper keys
-        ; Open hotkey sheet
+        ;Open hotkey sheet
             SheetHK := "<+<^<!H"
             hotkey, %SheetHK%, sheetLab
         ;All active Windows
@@ -29,22 +87,46 @@ SetTitleMatchMode, 2
             hotkey, %reloadHK%, reloadLab
         ;Open helper GUI
             helperGUIHK := "<+<^<!G"
-            hotkey, %helperGUIHK%, helperGUILab     
+            hotkey, %helperGUIHK%, helperGUILab
+        ;Active window check 
+            activeCheckHK := "<+<^<!_"
+            hotkey, %activeCheckHK%, activeCheckLab               
     ;HOTKEYS Application min, max, and monitor cycle 
         ;Maximize or restore toggle for active window 
             maxToggleHK := "F22"
             hotkey, %maxToggleHK%, maxToggleLab
-        ;Minimize active window
-            minWinHK := "F21"
-            hotkey, %minWinHK%, MinWinLab
         ;Move active window to other monitor    
             monitorCycleHK := "F24"
             hotkey, %monitorCycleHK%, monitorCycleLab
+        ;Move active window to other monitor    
+            monitor1OnlyHK := "<+F20"
+            hotkey, %monitor1OnlyHK%, monitor1OnlyLab
+        ;Move active window to other monitor    
+            monitor2OnlyHK := "<+F22"
+            hotkey, %monitor2OnlyHK%, monitor2OnlyLab
+        ;Move active window to other monitor    
+            monitorExtendHK := "<+F24"
+            hotkey, %monitorExtendHK%, monitorExtendLab
+        ;Restore windows
+            restoreWinPosHK := "^F24"
+            hotkey, %restoreWinPosHK%, restoreWinPosLab
     ;HOTKEYS Application process kill
         ;Kill current active process/close tab
             killProcessHK:= "<+F14"
             hotkey, %killProcessHK%, killProcessLab
     ;HOTKEYS Application open and make active. Cycle tabs
+        ;First Active window save / make active
+            firstActiveHoldHK := ">+F21"
+            hotkey, %firstActiveHoldHK%, firstActiveHoldLab
+        ;Second Active window save / make active
+            secondActiveHoldHK := ">+F23"
+            hotkey, %secondActiveHoldHK%, secondActiveHoldLab
+        ;First Active window clear
+            firstActiveClearHK := ">+F22"
+            hotkey, %firstActiveClearHK%, firstActiveClearLab
+        ;Second Active window clear
+            secondActiveClearHK := ">+F24"
+            hotkey, %secondActiveClearHK%, secondActiveClearLab
         ;Firefox Default Account make active/cycle tabs
             ffOpenMainHK := ">^F19"
             hotkey, %ffOpenMainHK%, ffOpenMainLab
@@ -66,8 +148,14 @@ SetTitleMatchMode, 2
         ;Spotify make active/open
             spotifyOpenHK := ">+>^F22"
             hotkey, %spotifyOpenHK%, spotifyOpenLab
+        ;Pocket Casts make active/open
+            PCOpenHK := ">!>^F22"
+            hotkey, %PCOpenHK%, PCOpenLab
+        ;VLC Player make ative/open
+            vlcOpenHK := ">^F23"
+            hotkey, %vlcOpenHK%, vlcOpenLab        
         ;Photoshop make active/open cycle tabs
-            psOpenHK := ">^F23"
+            psOpenHK := ">+>^F23"
             hotkey, %psOpenHK%, psOpenLab
         ;Steam Main make active/open   
             steamOpenMainHK := ">^F24"
@@ -76,7 +164,7 @@ SetTitleMatchMode, 2
             steamOpenAltHK := ">+>^F24"
             hotkey, %steamOpenAltHK%, steamOpenAltLab
         ;Koolertron Editor active/open
-            koolertronOpenHK := ">+F24"
+            koolertronOpenHK := "<+F13"
             hotkey, %koolertronOpenHK%, koolertronOpenLab
         ;Volume mixer open/make active
             volMixOpenHK := "F23"
@@ -170,11 +258,25 @@ SetTitleMatchMode, 2
                 hotkey, %mainSysVolDown10HK%, mainSysVolDown10Lab        
             ;main system volume up 10% 
                 mainSysVolUp10HK := ">!F20"
-                hotkey, %mainSysVolUp10HK%, mainSysVolUp10Lab        
+                hotkey, %mainSysVolUp10HK%, mainSysVolUp10Lab     
     Return
 ;Main code
+    ;Media Keys
+        ;Track Control
+            ;Track Previous
+                trackPrevLab:
+                    Send {Media_Prev}
+                    return
+            ;Track Play/Pause
+                trackPlayLab:
+                    Send {Media_Play_Pause}
+                    return
+            ;Track next
+                trackNextLab:
+                    Send {Media_Next}
+                    return
     ;One time helper keys
-        ; Open hotkey sheet
+        ;Open hotkey sheet
             sheetLab:
                 IfWinExist, AHK-DailyDriver hotkey mapping
                 {
@@ -185,6 +287,33 @@ SetTitleMatchMode, 2
                 {
                     RunWait, cmd.exe /c start firefox.exe -p default-release -new-tab https://docs.google.com/spreadsheets/d/1eRfcNj-UR4kXf5fBXDS4rn95YMSlbbT8McJL3HkK-_A/edit ,,Hide 
                 }    
+                Return
+        ;Active window check
+            activeCheckLab:
+                soundVar := "svchost.exe%b{ac704d33-4b02-492c-a578-f52c49993ce0}"
+                WinGet, SoundPid, PID, ahk_exe %soundVar%
+                MsgBox, %SoundPid%
+                noneStg := "None"
+                this_id := WinExist("A")
+                WinGetTitle, this_title, ahk_id %this_id%
+                WinGetClass, this_class, ahk_id %this_id%
+                WinGet, this_PID, PID, ahk_id %this_id%
+                If (firstActiveHoldID = "" && secondActiveHoldID = "")
+                {
+                    MsgBox,Active window info:`n`n Title = %this_title%`n Class = %this_class%`n PID = %this_PID%`n`n Active Hold info:`n`n firstActiveHoldCount = %firstActiveHoldCount%`n firstActiveHoldID = %noneStg%`n secondActiveHoldCount = %secondActiveHoldCount%`n secondActiveHoldID = %noneStg%
+                    Return
+                }
+                If (firstActiveHoldID = "")
+                {
+                    MsgBox,Active window info:`n`n Title = %this_title%`n Class = %this_class%`n PID = %this_PID%`n`n Active Hold info:`n`n firstActiveHoldCount = %firstActiveHoldCount%`n firstActiveHoldID = %noneStg%`n secondActiveHoldCount = %secondActiveHoldCount%`n secondActiveHoldID = %secondActiveHoldID%
+                    Return            
+                }
+                If (secondActiveHoldID = "")
+                {
+                    MsgBox,Active window info:`n`n Title = %this_title%`n Class = %this_class%`n PID = %this_PID%`n`n Active Hold info:`n`n firstActiveHoldCount = %firstActiveHoldCount%`n firstActiveHoldID = %firstActiveHoldID%`n secondActiveHoldCount = %secondActiveHoldCount%`n secondActiveHoldID = %noneStg%
+                    Return            
+                }
+                MsgBox,Active window info:`n`n Title = %this_title%`n Class = %this_class%`n PID = %this_PID%`n`n Active Hold info:`n`n firstActiveHoldCount = %firstActiveHoldCount%`n firstActiveHoldID = %firstActiveHoldID%`n secondActiveHoldCount = %secondActiveHoldCount%`n secondActiveHoldID = %secondActiveHoldID%
                 Return
         ;All active Windows
             allActiveLab:
@@ -201,8 +330,10 @@ SetTitleMatchMode, 2
                 Return
         ;Script reload
             reloadLab: 
+                currAct := WinActive("A")
                 MsgBox, Reloading Script dailyDriver.ahk
                 Reload
+                WinActivate, ahk_id %currAct%
                 return
         ;Open helper GUI
             helperGUILab:
@@ -225,23 +356,84 @@ SetTitleMatchMode, 2
                     WinRestore, A
                     Return
                 }
-        ;Minimize active window   
-            minWinLab:
-                WinGet, winState, MinMax, A
-                If (winState = 1 || winState = 0)
-                {
-                    WinMinimize, A
-                    Return
-                }
-                If (winState = -1)
-                {
-                    Return
-                }
-                Return
         ;Move active window to other monitor
             monitorCycleLab:
                 Send, {LWinDown}{ShiftDown}{Left}{ShiftUp}{LWinUp}
                 Return
+        ;Set Monitor 1 only
+            monitor1OnlyLab:
+                FileDelete, AllWinPos.txt
+                SysGet, numOfMonitors, MonitorCount
+                SysGet, priMonitor, MonitorPrimary
+                SysGet, mon1, Monitor, 1
+                SysGet, mon2, Monitor, 2
+                WinGet,Windows,List
+                ;MsgBox, %Windows%
+                Loop,%Windows%
+                {
+                    this_id := "ahk_id " . Windows%A_Index%
+                    WinGetTitle, this_title, %this_id%
+                    WinGetClass, this_class, %this_id%
+                    WinGet, this_PID, PID, %this_id%
+                    WinGet, Winstate, MinMax, %this_id%
+                    
+                    ;MsgBox, Title = %this_title%`n Class = %this_class%`n PID = %this_PID%
+                    WinGetPos, currX, currY, currH, currW, %this_id%
+                    ;MsgBox, %currX%
+                    FileAppend, %currX%\%currY%\%currH%\%currW%\%Winstate%\%this_title%`n, AllWinPos.txt
+                }
+                ;MsgBox, Monitor 1
+                Run cmd.exe /c C:\Windows\System32\DisplaySwitch.exe /internal ,,Hide
+                Return
+        ;Set monitor 2 only
+            monitor2OnlyLab:
+                FileDelete, AllWinPos.txt
+                SysGet, numOfMonitors, MonitorCount
+                SysGet, priMonitor, MonitorPrimary
+                SysGet, mon1, Monitor, 1
+                SysGet, mon2, Monitor, 2
+                WinGet,Windows,List
+                ;MsgBox, %Windows%
+                Loop,%Windows%
+                {
+                    this_id := "ahk_id " . Windows%A_Index%
+                    WinGetTitle, this_title, %this_id%
+                    WinGetClass, this_class, %this_id%
+                    WinGet, this_PID, PID, %this_id%
+                    WinGet, Winstate, MinMax, %this_id%
+                    
+                    ;MsgBox, Title = %this_title%`n Class = %this_class%`n PID = %this_PID%
+                    WinGetPos, currX, currY, currH, currW, %this_id%
+                    ;MsgBox, %currX%
+                    FileAppend, %currX%\%currY%\%currH%\%currW%\%Winstate%\%this_title%`n, AllWinPos.txt
+                }
+                ;MsgBox, Monitor 2
+                Run cmd.exe /c C:\Windows\System32\DisplaySwitch.exe /external ,,Hide
+                Return
+        ;Set extended monitor layout
+            monitorExtendLab:
+                ;MsgBox, Monitor Extend
+                Run, cmd.exe /c C:\Windows\System32\DisplaySwitch.exe /extend ,,Hide
+                Sleep, 3000
+                Send, {CtrlDown}{F24}{CtrlUp}    
+                Return
+        ;Restore window config
+            restoreWinPosLab:
+                Loop, Read, AllWinPos.txt
+                {
+                    ;MsgBox, %A_LoopReadLine%
+                    StringSplit, HoldArr, A_LoopReadLine, \
+                    If (HoldArr6)
+                    {
+                        WinMove, %HoldArr6%,, %HoldArr1%, %HoldArr2%, %HoldArr3%, %HoldArr4%, %HoldArr5%
+                        If (HoldArr5 = 1)
+                        {
+                            WinMaximize, %HoldArr6%
+                        }
+                    }
+
+                }   
+                Return             
     ;Application process kill  
         ;Kill current active process/close tab
             killProcessLab:
@@ -270,6 +462,88 @@ SetTitleMatchMode, 2
                 }
                 Return
     ;Application open and make active. Cycle tabs
+        ;First active hold key/make active
+            firstActiveHoldLab:
+                If (firstActiveHoldCount = 0)
+                {
+                    firstActiveHoldID := WinExist("A")
+                    If (firstActiveHoldID = "")
+                    {
+                        MsgBox,, Notice, No active window was selected try again, 1
+                        Return
+                    }
+                    firstActiveHoldCount++
+                    Return
+                }
+                If (firstActiveHoldCount = 1)
+                {
+                    ;error handling
+                    If (firstActiveHoldID = "")
+                    {
+                        MsgBox,, Notice, No active window held, 1
+                        firstActiveHoldCount := 0 
+                        Return
+                    }
+                    IfWinActive, ahk_id %firstActiveHoldID%
+                    {
+                        Return
+                    }
+                    IfWinNotActive, ahk_id %firstActiveHoldID%
+                    {
+                        WinActivate, ahk_id %firstActiveHoldID%
+                        Return
+                    }
+                }           
+                Return   
+        ;Second active hold key/make active
+            secondActiveHoldLab:
+                If (secondActiveHoldCount = 0)
+                {
+                    secondActiveHoldID := WinExist("A")
+                    If (secondActiveHoldID = "")
+                    {
+                        MsgBox,, Notice, No active window was selected try again., 1
+                        Return
+                    }
+                    secondActiveHoldCount++
+                    Return
+                }
+                If (secondActiveHoldCount = 1)
+                {
+                    ;error handling
+                    If (secondActiveHoldID = "")
+                    {
+                        MsgBox,, Notice, No active window held, 1
+                        secondActiveHoldCount := 0 
+                        Return
+                    }
+                    IfWinActive, ahk_id %secondActiveHoldID%
+                    {
+                        Return
+                    }
+                    IfWinNotActive, ahk_id %secondActiveHoldID%
+                    {
+                        WinActivate, ahk_id %secondActiveHoldID%
+                        Return
+                    }
+                }           
+                Return 
+        ;First active hold clear
+            firstActiveClearLab:
+                firstHold := WinActive("A")
+                firstActiveHoldCount := 0
+                firstActiveHoldID := ""
+                MsgBox,, Notice, First window hold cleared, 1
+                WinActivate, ahk_id %firstHold%
+                Return
+        ;Second active hold clear
+            secondActiveClearLab:
+                secondHold := WinActive("A")
+                secondActiveHoldCount := 0
+                secondActiveHoldID := ""
+                MsgBox,, Notice, Second window hold cleared, 1
+                WinActivate, ahk_id %secondHoldHold%
+                Return 
         ;Firefox Default Account make active/cycle tabs
             ffOpenMainLab:
                 profile := "-Main-" 
@@ -429,7 +703,39 @@ SetTitleMatchMode, 2
                 {
                     RunWait, "C:\Users\Colto\AppData\Roaming\Spotify\Spotify.exe" ,,Hide
                     Return
-                }  
+                } 
+        ;Pocket Casts make active/open
+            PCOpenLab:    
+                IfWinExist, Pocket Casts Desktop
+                {
+                    WinGet,spotActive,ID, Pocket Casts Desktop
+                    WinActivate, ahk_id %spotActive%
+                    Return
+                }
+                IfWinNotExist, Pocket Casts Desktop
+                {
+                    RunWait, "C:\Users\Colto\Documents\WindowsAppLink\Pocket Casts Desktop"
+                    Return
+                } 
+        ;VLC Player make active/open
+            vlcOpenLab:
+                IfWinActive, VLC media player
+                {
+                    Sleep, 100
+                    Send, {CtrlDown}1{CtrlUp}
+                    Return
+                }
+                IfWinExist, VLC media player
+                {
+                    WinGet,spotActive,ID, VLC media player
+                    WinActivate, ahk_id %spotActive%
+                    Return
+                }
+                IfWinNotExist, VLC media player
+                {
+                    Runwait, "C:\Program Files\VideoLAN\VLC\vlc.exe"
+                    return
+                }                
         ;Photoshop make active/open cycle tabs  
             psOpenLab:
                 IfWinExist, ahk_exe photoshop.exe
@@ -495,13 +801,19 @@ SetTitleMatchMode, 2
                 }
                 IfWinNotExist, AMAKeyboardClient
                 {
-                    Run, "C:\Users\Colto\Documents\amag\amag\AMAG_EN\AMAG.exe" ,,Hide
+                    RunWait, "C:\Users\Colto\Documents\amag\amag\AMAG_EN\AMAG.exe" ,,Hide
+                    amagID := WinExist(ahk_exe "C:\Users\Colto\Documents\amag\amag\AMAG_EN\AMAG.exe")
+                    WinActivate, ahk_id %amagID%
                     Return
                 }
         ;Volume mixer open/make active
             volMixOpenLab:
-                Run C:\Windows\System32\SndVol.exe
-                WinWait, ahk_exe SndVol.exe
+                IfWinNotExist, ahk_exe SndVol.exe
+                {
+                    Run C:\Windows\System32\SndVol.exe 
+                    WinWait, ahk_exe SndVol.exe    
+                    WinActivate, ahk_exe SndVol.exe               
+                }  
                 If WinExist("ahk_exe SndVol.exe")  
                     WinActivate, ahk_exe SndVol.exe
                 Return
@@ -546,31 +858,53 @@ SetTitleMatchMode, 2
         ;focused application volumes
             ;focused application volume down 2%
                 focusVolDown2Lab:
-                    Run cmd.exe /c start nircmd.exe changeappvolume focused -0.02 ,,Hide
+                    SoundGet, currVol
+                    percentCurrVol := currVol / 100
+                    percentRecalc := 0.02 / percentCurrVol
+                    Run cmd.exe /c start nircmd.exe changeappvolume focused -%percentRecalc% ,,Hide
                     return
             ;focused application volume up 2%        
                 focusVolUp2Lab:
-                    Run cmd.exe /c start nircmd.exe changeappvolume focused +0.02 ,,Hide
+                    SoundGet, currVol
+                    percentCurrVol := currVol / 100
+                    percentRecalc := 0.02 / percentCurrVol 
+                    vlcAdjust := percentRecalc/10 
+                    Run cmd.exe /c start nircmd.exe changeappvolume focused +%percentRecalc% ,,Hide
                     return
             ;focused application volume down 5%
                 focusVolDown5Lab:
-                    Run cmd.exe /c start nircmd.exe changeappvolume focused -0.05 ,,Hide
+                    SoundGet, currVol
+                    percentCurrVol := currVol / 100
+                    percentRecalc := 0.05 / percentCurrVol 
+                    Run cmd.exe /c start nircmd.exe changeappvolume focused -%percentRecalc% ,,Hide
                     return
             ;focused application volume up 5%
                 focusVolUp5Lab:
-                    Run cmd.exe /c start nircmd.exe changeappvolume focused +0.05 ,,Hide
+                    SoundGet, currVol
+                    percentCurrVol := currVol / 100
+                    percentRecalc := 0.05 / percentCurrVol
+                    Run cmd.exe /c start nircmd.exe changeappvolume focused +%percentRecalc% ,,Hide
                     return
             ;focused application volume down 10%
                 focusVolDown10Lab:
-                    Run cmd.exe /c start nircmd.exe changeappvolume focused -0.1 ,,Hide
+                    SoundGet, currVol
+                    percentCurrVol := currVol / 100
+                    percentRecalc := 0.1 / percentCurrVol 
+                    Run cmd.exe /c start nircmd.exe changeappvolume focused -%percentRecalc% ,,Hide
                     return
             ;focused application volume up 10%
                 focusVolUp10Lab:
-                    Run cmd.exe /c start nircmd.exe changeappvolume focused +0.1 ,,Hide
+                    SoundGet, currVol
+                    percentCurrVol := currVol / 100
+                    percentRecalc := 0.1 / percentCurrVol 
+                    Run cmd.exe /c start nircmd.exe changeappvolume focused +%percentRecalc% ,,Hide
                     return
         ;Media volumes
             ;Media volume control (firefox,chrome,tidal,and spotify) down 2%
                 mediaVolDown2Lab:
+                    SoundGet, currVol
+                    percentCurrVol := currVol / 100
+                    percentRecalc := 0.02 / percentCurrVol            
                     ;Check for active Firefox
                     IfWinExist, ahk_class MozillaWindowClass
                     {
@@ -592,26 +926,37 @@ SetTitleMatchMode, 2
                         uniqMultiArr := uniq(multiWindowArr)
                         For e, v in uniqMultiArr 
                         {
-                            Run cmd.exe /c start nircmd.exe changeappvolume /%v% -0.02 ,,Hide
+                            Run cmd.exe /c start nircmd.exe changeappvolume /%v% -%percentRecalc% ,,Hide
                         }    
                     }
                     ;Check for active Google Chrome
                     IfWinExist, Google Chrome
                     {
-                        Run cmd.exe /c start nircmd.exe changeappvolume chrome.exe -0.02 ,,Hide
+                        Run cmd.exe /c start nircmd.exe changeappvolume chrome.exe -%percentRecalc% ,,Hide
                     }
                     IfWinExist, ahk_exe TIDAL.exe
                     {
-                        Run cmd.exe /c start nircmd.exe changeappvolume TIDAL.exe -0.02 ,,Hide               
-                        Run cmd.exe /c start nircmd.exe changeappvolume TIDALPlayer.exe -0.02 ,,Hide         
+                        Run cmd.exe /c start nircmd.exe changeappvolume TIDAL.exe -%percentRecalc% ,,Hide               
+                        Run cmd.exe /c start nircmd.exe changeappvolume TIDALPlayer.exe -%percentRecalc% ,,Hide         
                     }
                     IfWinExist, ahk_exe Spotify.exe
                     {
-                        Run cmd.exe /c start nircmd.exe changeappvolume Spotify.exe -0.02 ,,Hide            
+                        Run cmd.exe /c start nircmd.exe changeappvolume Spotify.exe -%percentRecalc% ,,Hide            
+                    }
+                    IfWinExist, Pocket Casts
+                    {
+                        Run cmd.exe /c start nircmd.exe changeappvolume "Pocket Casts.exe" -%percentRecalc% ,,Hide                         
+                    } 
+                    IfWinExist, VLC media player 
+                    {
+                        Run cmd.exe /c start nircmd.exe changeappvolume vlc.exe -0.02 ,,Hide                        
                     }
                     Return
             ;Media volume control (firefox,chrome,tidal,and spotify) up 2%
                 mediaVolUp2Lab:
+                    SoundGet, currVol
+                    percentCurrVol := currVol / 100
+                    percentRecalc := 0.02 / percentCurrVol
                     ;Check for active Firefox
                     IfWinExist, ahk_class MozillaWindowClass
                     {
@@ -633,25 +978,36 @@ SetTitleMatchMode, 2
                         uniqMultiArr := uniq(multiWindowArr)
                         For e, v in uniqMultiArr 
                         {
-                            Run cmd.exe /c start nircmd.exe changeappvolume /%v% +0.02 ,,Hide
+                            Run cmd.exe /c start nircmd.exe changeappvolume /%v% +%percentRecalc% ,,Hide
                         }    
                     }
                     ;Check for active Google Chrome
                     IfWinExist, Google Chrome
                     {
-                        Run cmd.exe /c start nircmd.exe changeappvolume chrome.exe +0.02 ,,Hide
+                        Run cmd.exe /c start nircmd.exe changeappvolume chrome.exe +%percentRecalc% ,,Hide
                     } 
                     IfWinExist, ahk_exe TIDAL.exe
                     {
-                        Run cmd.exe /c start nircmd.exe changeappvolume TIDALPlayer.exe +0.02 ,,Hide            
+                        Run cmd.exe /c start nircmd.exe changeappvolume TIDALPlayer.exe +%percentRecalc% ,,Hide            
                     }
                     IfWinExist, ahk_exe Spotify.exe
                     {
-                        Run cmd.exe /c start nircmd.exe changeappvolume Spotify.exe +0.02 ,,Hide            
+                        Run cmd.exe /c start nircmd.exe changeappvolume Spotify.exe +%percentRecalc% ,,Hide            
+                    }
+                    IfWinExist, Pocket Casts
+                    {
+                        Run cmd.exe /c start nircmd.exe changeappvolume "Pocket Casts.exe" +%percentRecalc% ,,Hide                         
+                    }
+                    IfWinExist, VLC media player 
+                    {
+                        Run cmd.exe /c start nircmd.exe changeappvolume vlc.exe +0.02 ,,Hide                        
                     }
                     Return
             ;Media volume control (firefox,chrome,tidal,and spotify) down 5%
                 mediaVolDown5Lab:
+                     SoundGet, currVol
+                    percentCurrVol := currVol / 100
+                    percentRecalc := 0.05 / percentCurrVol                
                     ;Check for active Firefox
                     IfWinExist, ahk_class MozillaWindowClass
                     {
@@ -673,26 +1029,37 @@ SetTitleMatchMode, 2
                         uniqMultiArr := uniq(multiWindowArr)
                         For e, v in uniqMultiArr 
                         {
-                            Run cmd.exe /c start nircmd.exe changeappvolume /%v% -0.05 ,,Hide
+                            Run cmd.exe /c start nircmd.exe changeappvolume /%v% -%percentRecalc% ,,Hide
                         }    
                     }
                     ;Check for active Google Chrome
                     IfWinExist, Google Chrome
                     {
-                        Run cmd.exe /c start nircmd.exe changeappvolume chrome.exe -0.05 ,,Hide
+                        Run cmd.exe /c start nircmd.exe changeappvolume chrome.exe -%percentRecalc% ,,Hide
                     }
                     IfWinExist, ahk_exe TIDAL.exe
                     {
-                        Run cmd.exe /c start nircmd.exe changeappvolume TIDALPlayer.exe -0.05 ,,Hide            
+                        Run cmd.exe /c start nircmd.exe changeappvolume TIDAL.exe -%percentRecalc% ,,Hide               
+                        Run cmd.exe /c start nircmd.exe changeappvolume TIDALPlayer.exe -%percentRecalc% ,,Hide         
                     }
                     IfWinExist, ahk_exe Spotify.exe
                     {
-                        WinGet, spotPID, PID, ahk_exe Spotify.exe
-                        Run cmd.exe /c start nircmd.exe changeappvolume Spotify.exe -0.05 ,,Hide            
+                        Run cmd.exe /c start nircmd.exe changeappvolume Spotify.exe -%percentRecalc% ,,Hide            
+                    }
+                    IfWinExist, Pocket Casts
+                    {
+                        Run cmd.exe /c start nircmd.exe changeappvolume "Pocket Casts.exe" -%percentRecalc% ,,Hide                         
+                    }
+                    IfWinExist, VLC media player 
+                    {
+                        Run cmd.exe /c start nircmd.exe changeappvolume vlc.exe -0.05 ,,Hide                        
                     }
                     Return
             ;Media volume control (firefox,chrome,tidal,and spotify) up 5%
                 mediaVolUp5Lab:
+                    SoundGet, currVol
+                    percentCurrVol := currVol / 100
+                    percentRecalc := 0.05 / percentCurrVol  
                     ;Check for active Firefox
                     IfWinExist, ahk_class MozillaWindowClass
                     {
@@ -714,66 +1081,36 @@ SetTitleMatchMode, 2
                         uniqMultiArr := uniq(multiWindowArr)
                         For e, v in uniqMultiArr 
                         {
-                            Run cmd.exe /c start nircmd.exe changeappvolume /%v% +0.05 ,,Hide
-                        }    
-                    }
-                    IfWinExist, Google Chrome
-                    {
-                        Run cmd.exe /c start nircmd.exe changeappvolume chrome.exe +0.05 ,,Hide
-                    } 
-                    IfWinExist, ahk_exe TIDAL.exe
-                    {
-                        Run cmd.exe /c start nircmd.exe changeappvolume TIDALPlayer.exe +0.05 ,,Hide            
-                    }
-                    IfWinExist, ahk_exe Spotify.exe
-                    {
-                        WinGet, spotPID, PID, ahk_exe Spotify.exe
-                        Run cmd.exe /c start nircmd.exe changeappvolume Spotify.exe +0.05 ,,Hide            
-                    }
-                    Return
-            ;Media volume control (firefox,chrome,tidal,and spotify) down 10%
-                mediaVolDown10Lab:
-                    ;Check for active Firefox
-                    IfWinExist, ahk_class MozillaWindowClass
-                    {
-                        multiWindowArr := []
-                        multiWinCounter := 0
-                        WinGet,Windows,List
-                        Loop,%Windows%
-                        {
-                            this_id := "ahk_id " . Windows%A_Index%
-                            WinGetTitle, this_title, %this_id%
-                            WinGetClass, this_class, %this_id%
-                            WinGet, this_PID, PID, %this_id%
-                            If (this_class = "MozillaWindowClass") 
-                            {
-                                multiWinCounter += 1
-                                multiWindowArr.Push(this_PID)
-                            }
-                        }
-                        uniqMultiArr := uniq(multiWindowArr)
-                        For e, v in uniqMultiArr 
-                        {
-                            Run cmd.exe /c start nircmd.exe changeappvolume /%v% -0.1 ,,Hide
+                            Run cmd.exe /c start nircmd.exe changeappvolume /%v% +%percentRecalc% ,,Hide
                         }    
                     }
                     ;Check for active Google Chrome
                     IfWinExist, Google Chrome
                     {
-                        Run cmd.exe /c start nircmd.exe changeappvolume chrome.exe -0.1 ,,Hide
-                    }
+                        Run cmd.exe /c start nircmd.exe changeappvolume chrome.exe +%percentRecalc% ,,Hide
+                    } 
                     IfWinExist, ahk_exe TIDAL.exe
                     {
-                        Run cmd.exe /c start nircmd.exe changeappvolume TIDALPlayer.exe -0.1 ,,Hide            
+                        Run cmd.exe /c start nircmd.exe changeappvolume TIDALPlayer.exe +%percentRecalc% ,,Hide            
                     }
                     IfWinExist, ahk_exe Spotify.exe
                     {
-                        WinGet, spotPID, PID, ahk_exe Spotify.exe
-                        Run cmd.exe /c start nircmd.exe changeappvolume Spotify.exe -0.1 ,,Hide            
+                        Run cmd.exe /c start nircmd.exe changeappvolume Spotify.exe +%percentRecalc% ,,Hide            
+                    }
+                    IfWinExist, Pocket Casts
+                    {
+                        Run cmd.exe /c start nircmd.exe changeappvolume "Pocket Casts.exe" +%percentRecalc% ,,Hide                         
+                    }
+                    IfWinExist, VLC media player 
+                    {
+                        Run cmd.exe /c start nircmd.exe changeappvolume vlc.exe +0.05 ,,Hide                        
                     }
                     Return
-            ;Media volume control (firefox,chrome,tidal,and spotify) up 10%
-                mediaVolUp10Lab:
+            ;Media volume control (firefox,chrome,tidal,and spotify) down 10%
+                mediaVolDown10Lab:
+                    SoundGet, currVol
+                    percentCurrVol := currVol / 100
+                    percentRecalc := 0.1 / percentCurrVol                
                     ;Check for active Firefox
                     IfWinExist, ahk_class MozillaWindowClass
                     {
@@ -795,80 +1132,152 @@ SetTitleMatchMode, 2
                         uniqMultiArr := uniq(multiWindowArr)
                         For e, v in uniqMultiArr 
                         {
-                            Run cmd.exe /c start nircmd.exe changeappvolume /%v% +0.1 ,,Hide
+                            Run cmd.exe /c start nircmd.exe changeappvolume /%v% -%percentRecalc% ,,Hide
                         }    
                     }
+                    ;Check for active Google Chrome
                     IfWinExist, Google Chrome
                     {
-                        Run cmd.exe /c start nircmd.exe changeappvolume chrome.exe +0.1 ,,Hide
-                    } 
+                        Run cmd.exe /c start nircmd.exe changeappvolume chrome.exe -%percentRecalc% ,,Hide
+                    }
                     IfWinExist, ahk_exe TIDAL.exe
                     {
-                        Run cmd.exe /c start nircmd.exe changeappvolume TIDALPlayer.exe +0.1 ,,Hide            
+                        Run cmd.exe /c start nircmd.exe changeappvolume TIDAL.exe -%percentRecalc% ,,Hide               
+                        Run cmd.exe /c start nircmd.exe changeappvolume TIDALPlayer.exe -%percentRecalc% ,,Hide         
                     }
                     IfWinExist, ahk_exe Spotify.exe
                     {
-                        WinGet, spotPID, PID, ahk_exe Spotify.exe
-                        Run cmd.exe /c start nircmd.exe changeappvolume Spotify.exe +0.1 ,,Hide            
+                        Run cmd.exe /c start nircmd.exe changeappvolume Spotify.exe -%percentRecalc% ,,Hide            
+                    }
+                    IfWinExist, Pocket Casts
+                    {
+                        Run cmd.exe /c start nircmd.exe changeappvolume "Pocket Casts.exe" -%percentRecalc% ,,Hide                         
+                    }
+                    IfWinExist, VLC media player 
+                    {
+                        Run cmd.exe /c start nircmd.exe changeappvolume vlc.exe -0.1 ,,Hide                        
+                    }
+                    Return
+            ;Media volume control (firefox,chrome,tidal,and spotify) up 10%
+                mediaVolUp10Lab:
+                    SoundGet, currVol
+                    percentCurrVol := currVol / 100
+                    percentRecalc := 0.1 / percentCurrVol  
+                    ;Check for active Firefox
+                    IfWinExist, ahk_class MozillaWindowClass
+                    {
+                        multiWindowArr := []
+                        multiWinCounter := 0
+                        WinGet,Windows,List
+                        Loop,%Windows%
+                        {
+                            this_id := "ahk_id " . Windows%A_Index%
+                            WinGetTitle, this_title, %this_id%
+                            WinGetClass, this_class, %this_id%
+                            WinGet, this_PID, PID, %this_id%
+                            If (this_class = "MozillaWindowClass") 
+                            {
+                                multiWinCounter += 1
+                                multiWindowArr.Push(this_PID)
+                            }
+                        }
+                        uniqMultiArr := uniq(multiWindowArr)
+                        For e, v in uniqMultiArr 
+                        {
+                            Run cmd.exe /c start nircmd.exe changeappvolume /%v% +%percentRecalc% ,,Hide
+                        }    
+                    }
+                    ;Check for active Google Chrome
+                    IfWinExist, Google Chrome
+                    {
+                        Run cmd.exe /c start nircmd.exe changeappvolume chrome.exe +%percentRecalc% ,,Hide
+                    } 
+                    IfWinExist, ahk_exe TIDAL.exe
+                    {
+                        Run cmd.exe /c start nircmd.exe changeappvolume TIDALPlayer.exe +%percentRecalc% ,,Hide            
+                    }
+                    IfWinExist, ahk_exe Spotify.exe
+                    {
+                        Run cmd.exe /c start nircmd.exe changeappvolume Spotify.exe +%percentRecalc% ,,Hide            
+                    }
+                    IfWinExist, Pocket Casts
+                    {
+                        Run cmd.exe /c start nircmd.exe changeappvolume "Pocket Casts.exe" +%percentRecalc% ,,Hide                         
+                    }
+                    IfWinExist, VLC media player 
+                    {
+                        Run cmd.exe /c start nircmd.exe changeappvolume vlc.exe +0.1 ,,Hide                        
                     }
                     Return
         ;Line in volumes
-            ;Line in volume control down 1%
-                lineVolDown1Lab:           
-                    cmdLine := "\Device\HarddiskVolume10\Windows\System32\svchost.exe%b{8E19A496-3D76-4D27-8FD0-7374125873B1}"
-                    Run SoundVolumeView.exe /ChangeVolume %cmdLine% -1 ,,Hide
-                    return 
-            ;Line in volume control up 1% 
-                lineVolUp1Lab:            
-                    cmdLine := "\Device\HarddiskVolume10\Windows\System32\svchost.exe%b{8E19A496-3D76-4D27-8FD0-7374125873B1}"
-                    Run SoundVolumeView.exe /ChangeVolume %cmdLine% +1 ,,Hide
-                    return    
+            ;Line in volume control down 2%
+                lineVolDown1Lab:
+                    SoundGet, currVol
+                    percentCurrVol := currVol / 100
+                    percentRecalc := 0.02 / percentCurrVol
+                    Run cmd.exe /c start nircmd.exe changeappvolume /%LineInPID% -%percentRecalc% ,,Hide
+                    Return
+            ;Line in volume control up 2% 
+                lineVolUp1Lab: 
+                    SoundGet, currVol
+                    percentCurrVol := currVol / 100
+                    percentRecalc := 0.02 / percentCurrVol
+                    Run cmd.exe /c start nircmd.exe changeappvolume /%LineInPID% +%percentRecalc% ,,Hide
+                    Return
             ;Line in volume control down 5%
                 lineVolDown5Lab:  
-                    cmdLine := "\Device\HarddiskVolume10\Windows\System32\svchost.exe%b{8E19A496-3D76-4D27-8FD0-7374125873B1}"
-                    Run SoundVolumeView.exe /ChangeVolume %cmdLine% -5 ,,Hide
-                    return 
+                    SoundGet, currVol
+                    percentCurrVol := currVol / 100
+                    percentRecalc := 0.05 / percentCurrVol
+                    Run cmd.exe /c start nircmd.exe changeappvolume /%LineInPID% -%percentRecalc% ,,Hide
+                    Return
             ;Line in volume control up 5%  
                 lineVolUp5Lab:  
-                    cmdLine := "\Device\HarddiskVolume10\Windows\System32\svchost.exe%b{8E19A496-3D76-4D27-8FD0-7374125873B1}"
-                    Run SoundVolumeView.exe /ChangeVolume %cmdLine% +5 ,,Hide
-                    return 
+                    SoundGet, currVol
+                    percentCurrVol := currVol / 100
+                    percentRecalc := 0.05 / percentCurrVol
+                    Run cmd.exe /c start nircmd.exe changeappvolume /%LineInPID% +%percentRecalc% ,,Hide
+                    Return
             ;Line in volume control down 10%
                 lineVolDown10Lab:  
-                    cmdLine := "\Device\HarddiskVolume10\Windows\System32\svchost.exe%b{8E19A496-3D76-4D27-8FD0-7374125873B1}"
-                    Run SoundVolumeView.exe /ChangeVolume %cmdLine% -10 ,,Hide
-                    return 
+                    SoundGet, currVol
+                    percentCurrVol := currVol / 100
+                    percentRecalc := 0.1 / percentCurrVol
+                    Run cmd.exe /c start nircmd.exe changeappvolume /%LineInPID% -%percentRecalc% ,,Hide
+                    Return
             ;Line in volume control up 10%  
                 lineVolUp10Lab:  
-                    cmdLine := "\Device\HarddiskVolume10\Windows\System32\svchost.exe%b{8E19A496-3D76-4D27-8FD0-7374125873B1}"
-                    Run SoundVolumeView.exe /ChangeVolume %cmdLine% +10 ,,Hide
-                    return 
+                    SoundGet, currVol
+                    percentCurrVol := currVol / 100
+                    percentRecalc := 0.1 / percentCurrVol
+                    Run cmd.exe /c start nircmd.exe changeappvolume /%LineInPID% +%percentRecalc% ,,Hide
+                    Return
         ;main system volumes
             ;main system volume down 2%
                 mainSysVolDown2Lab:
-                    SoundSet -2 
+                    Send, {Volume_Down 1}
                     Return
             ;main system volume up 2%
                 mainSysVolUp2Lab:
-                    SoundSet +2
+                    Send, {Volume_up 1}
                     Return       
-            ;main system volume down 5%
+            ;main system volume down 4%
                 mainSysVolDown5Lab:
-                    SoundSet -5
+                    Send, {Volume_Down 2}
                     Return
             ;main system volume up 5%
                 mainSysVolUp5Lab:
-                    SoundSet +5
+                    Send, {Volume_up 2}
                     Return
             ;main system volume down 10%
                 mainSysVolDown10Lab:
-                    SoundSet -10
+                    Send, {Volume_Down 5}
                     Return
             ;main system volume up 10%
                 mainSysVolUp10Lab:
-                    SoundSet +10
+                    Send, {Volume_up 5}
                     Return
-    
+
 
 
   

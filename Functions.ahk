@@ -12,3 +12,14 @@ uniq(nameArray)
 
   return trimmedArray
 }
+SectionHeader()
+{
+	SysGet, MonitorCount, MonitorCount
+	SysGet, MonitorPrimary, MonitorPrimary
+	line=SECTION: Monitors=%MonitorCount%,MonitorPrimary=%MonitorPrimary%
+
+        WinGetPos, x, y, Width, Height, Program Manager
+	line:= line . "; Desktop size:" . x . "," . y . "," . width . "," . height
+
+	Return %line%
+}
