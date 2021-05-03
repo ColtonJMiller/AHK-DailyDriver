@@ -34,7 +34,7 @@ grabInputPID()
         {
             StringMid pid, A_LoopField, 29, 7
             ;MsgBox %pid% - %A_LoopField%
-        }
+        }  
         IfInString A_LoopField, %searchedService%
         {
             ; /!\ I suppose the service name can be found only for the searched image
@@ -63,6 +63,7 @@ firstActiveHoldCount := 0
 firstActiveHoldID := ""
 secondActiveHoldCount := 0
 secondActiveHoldID := ""
+lineInMutePercent := 0
 ;HOTKEYS 
     ;HOTKEYS Media Keys 
         ;Track control
@@ -164,7 +165,7 @@ secondActiveHoldID := ""
             steamOpenAltHK := ">+>^F24"
             hotkey, %steamOpenAltHK%, steamOpenAltLab
         ;Koolertron Editor active/open
-            koolertronOpenHK := "<+F13"
+            koolertronOpenHK := "<+>^F24"
             hotkey, %koolertronOpenHK%, koolertronOpenLab
         ;Volume mixer open/make active
             volMixOpenHK := "F23"
@@ -183,6 +184,19 @@ secondActiveHoldID := ""
             chromeNewTabWorkHK := "<^>^F20"
             hotkey, %chromeNewTabWorkHK%, chromeNewTabWorkLab
     ;HOTKEYS Volume controls
+        ;Mute Channels
+            ;Mute/Unmute Focused volume
+                focusVolMuteHK := "<!F14"
+                hotkey, %focusVolMuteHK%, focusVolMuteLab
+            ;Mute/Unmute Media volume
+                mediaVolMuteHK := "<!F16"
+                hotkey, %mediaVolMuteHK%, mediaVolMuteLab
+            ;Mute/Unmute Line In volume
+                lineVolMuteHK := "<!F18"
+                hotkey, %lineVolMuteHK%, lineVolMuteLab
+            ;Mute/Unmute System volume
+                sysVolMuteHK := "<!F20"
+                hotkey, %sysVolMuteHK%, sysVolMuteLab
         ;focused application volumes
             ;focused application volume down 2%
                 focusVolDown2HK := "F13"
@@ -258,7 +272,21 @@ secondActiveHoldID := ""
                 hotkey, %mainSysVolDown10HK%, mainSysVolDown10Lab        
             ;main system volume up 10% 
                 mainSysVolUp10HK := ">!F20"
-                hotkey, %mainSysVolUp10HK%, mainSysVolUp10Lab     
+                hotkey, %mainSysVolUp10HK%, mainSysVolUp10Lab   
+    ;HOTKEYS EQ and Sound Output
+        ;Switch output with EQ change
+            ;Set BTA30 Digital output/Peace EQ XM4
+                DOEQHK := "<!>^F19"
+                hotkey, %DOEQHK%, DOEQLab   
+            ;Set Logitech Pro X output/Peace EQ Pro X
+                LPXEQHK := "<!>^F20"
+                hotkey, %LPXEQHK%, LPXEQLab   
+            ;Set FiiO K5 Speaker output/Peace EQ 770 80ohm
+                K5770EQHK := "<!>^F21"
+                hotkey, %K5770EQHK%, K5770EQLab  
+            ;Set FiiO K5 Speaker output/Peace EQ MK5  
+                K5MK5EQHK := "<!>^F22"
+                hotkey, %K5MK5EQHK%, K5MK5EQLab  
     Return
 ;Main code
     ;Media Keys
@@ -278,6 +306,8 @@ secondActiveHoldID := ""
     ;One time helper keys
         ;Open hotkey sheet
             sheetLab:
+                profile := "-Main-" 
+                profileName := "default-release-1"            
                 IfWinExist, AHK-DailyDriver hotkey mapping
                 {
                     sheetId := WinExist("AHK-DailyDriver hotkey mapping")
@@ -285,7 +315,7 @@ secondActiveHoldID := ""
                 }
                 IfWinNotExist, AHK-DailyDriver hotkey mapping
                 {
-                    RunWait, cmd.exe /c start firefox.exe -p default-release -new-tab https://docs.google.com/spreadsheets/d/1eRfcNj-UR4kXf5fBXDS4rn95YMSlbbT8McJL3HkK-_A/edit ,,Hide 
+                    RunWait, C:\Program Files\Mozilla Firefox\firefox.exe -p %profileName% -new-tab https://docs.google.com/spreadsheets/d/1eRfcNj-UR4kXf5fBXDS4rn95YMSlbbT8McJL3HkK-_A/edit ,,Hide 
                 }    
                 Return
         ;Active window check
@@ -413,27 +443,72 @@ secondActiveHoldID := ""
         ;Set extended monitor layout
             monitorExtendLab:
                 ;MsgBox, Monitor Extend
-                Run, cmd.exe /c C:\Windows\System32\DisplaySwitch.exe /extend ,,Hide
+                RunWait, cmd.exe /c C:\Windows\System32\DisplaySwitch.exe /extend ,,Hide
                 Sleep, 3000
-                Send, {CtrlDown}{F24}{CtrlUp}    
+                ;Loop, Read, AllWinPos.txt
+                ;{
+                ;    currInnerActive := WinActive("A")
+                ;    ;MsgBox, %A_LoopReadLine%
+                ;    StringSplit, HoldArr, A_LoopReadLine, \
+                ;    If (HoldArr6 != "Program Manager")
+                ;    {
+                ;        If (HoldArr6 != "Switch USB")
+                ;        {
+                ;            If (HoldArr6)
+                ;            {
+                ;                If (HoldArr2 < -1080)
+                ;                {
+                ;                ;MsgBox %HoldArr6% met condition with %HoldArr1% %HoldArr2%
+                ;                WinGetPos, currInnerX, currInnerY, currInnerH, currInnerW, %HoldArr7%
+                ;                WinGet, WinState, MinMax, %HoldArr7%
+                ;                ;MsgBox %HoldArr6%`n x: %currInnerX%`n y: %currInnerY%
+                ;                    WinActivate, %HoldArr6%
+                ;                    Send, {LWinDown}{ShiftDown}{Left}{ShiftUp}{LWinUp}
+                ;                    If (WinState != 1)
+                ;                    {
+                ;                        WinMaximize, %HoldArr6%
+                ;                    }
+                ;                    WinActivate, ahk_id currInnerActive
+                ;                }
+                ;            }
+                ;        }
+                ;    }
+                ;}
                 Return
         ;Restore window config
             restoreWinPosLab:
                 Loop, Read, AllWinPos.txt
                 {
+                    currInnerActive := WinActive("A")
                     ;MsgBox, %A_LoopReadLine%
                     StringSplit, HoldArr, A_LoopReadLine, \
-                    If (HoldArr6)
+                    If (HoldArr6 != "Program Manager")
                     {
-                        WinMove, %HoldArr6%,, %HoldArr1%, %HoldArr2%, %HoldArr3%, %HoldArr4%, %HoldArr5%
-                        If (HoldArr5 = 1)
+                        If (HoldArr6 != "Switch USB")
                         {
-                            WinMaximize, %HoldArr6%
+                            If (HoldArr6)
+                            {
+                                If (HoldArr1 < -9 ||HoldArr2 < -9)
+                                {
+                                    ;MsgBox %HoldArr6% met condition with %HoldArr1% %HoldArr2%
+                                    WinGetPos, currInnerX, currInnerY, currInnerH, currInnerW, %HoldArr7%
+                                    ;MsgBox %HoldArr6%`n x: %currInnerX%`n y: %currInnerY%
+                                    If (currInnerY < -9)
+                                    {
+                                        ;MsgBox break met
+                                    }
+                                    Else
+                                    {
+                                        WinActivate, %HoldArr6%
+                                        Send, {LWinDown}{ShiftDown}{Left}{ShiftUp}{LWinUp}
+                                        WinActivate, ahk_id currInnerActive
+                                    }
+                                }
+                            }
                         }
                     }
-
-                }   
-                Return             
+                }
+                Return            
     ;Application process kill  
         ;Kill current active process/close tab
             killProcessLab:
@@ -547,7 +622,7 @@ secondActiveHoldID := ""
         ;Firefox Default Account make active/cycle tabs
             ffOpenMainLab:
                 profile := "-Main-" 
-                profileName := "default-release"
+                profileName := "default-release-1"
                 IfWinExist, %profile%
                 {
                     WinGet, actCheck, ID, %profile%
@@ -566,7 +641,7 @@ secondActiveHoldID := ""
                 }
                 IfWinNotExist, %profile%
                 {
-                    Run, cmd.exe /c start firefox.exe -p %profileName% -new-tab about:home ,,Hide
+                    Run, C:\Program Files\Mozilla Firefox\firefox.exe -p %profileName% -new-tab about:home ,,Hide
                     WinWait, %profile%
                     Return
                 } 
@@ -574,7 +649,7 @@ secondActiveHoldID := ""
         ;Firefox Alt Account make active/cycle tabs
             ffOpenAltLab:
                 profile := "-Hifi-" 
-                profileName := "HifiVox"
+                profileName := "default-nightly"
                 IfWinExist, %profile%
                 {
                     WinGet, actCheck, ID, %profile%
@@ -593,7 +668,7 @@ secondActiveHoldID := ""
                 }
                 IfWinNotExist, %profile%
                 {
-                    Run, cmd.exe /c start firefox.exe -p %profileName% -new-tab about:home ,,Hide
+                    Run, C:\Program Files\Firefox Nightly\firefox.exe -p %profileName% -new-tab about:home ,,Hide
                     WinWait, %profile%
                     Return
                 } 
@@ -673,7 +748,7 @@ secondActiveHoldID := ""
                 }
                 IfWinNotExist, %profile%
                 {
-                    Run, "C:\Users\Colto\AppData\Local\Programs\Microsoft VS Code\Code.exe" ,,Hide
+                    Run, "C:\Users\Colton\AppData\Local\Programs\Microsoft VS Code\Code.exe" ,,Hide
                     Return
                 } 
                 Return  
@@ -687,21 +762,21 @@ secondActiveHoldID := ""
                 }
                 IfWinNotExist, ahk_exe TIDAL.exe
                 {
-                    Run, "C:\Users\Colto\AppData\Local\TIDAL\TIDAL.exe" ,,Hide
+                    Run, "C:\Users\Colton\AppData\Local\TIDAL\TIDAL.exe" ,,Hide
                     Return
                 } 
                 Return
         ;Spotify make active/open
             spotifyOpenLab:
-                IfWinExist, ahk_exe C:\Users\Colto\AppData\Roaming\Spotify\Spotify.exe
+                IfWinExist, ahk_exe C:\Users\Colton\AppData\Roaming\Spotify\Spotify.exe
                 {
-                    WinGet,spotActive,ID, ahk_exe C:\Users\Colto\AppData\Roaming\Spotify\Spotify.exe
+                    WinGet,spotActive,ID, ahk_exe C:\Users\Colton\AppData\Roaming\Spotify\Spotify.exe
                     WinActivate, ahk_id %spotActive%
                     Return
                 }
-                IfWinNotExist, ahk_exe C:\Users\Colto\AppData\Roaming\Spotify\Spotify.exe
+                IfWinNotExist, ahk_exe C:\Users\Colton\AppData\Roaming\Spotify\Spotify.exe
                 {
-                    RunWait, "C:\Users\Colto\AppData\Roaming\Spotify\Spotify.exe" ,,Hide
+                    RunWait, "C:\Users\Colton\AppData\Roaming\Spotify\Spotify.exe" ,,Hide
                     Return
                 } 
         ;Pocket Casts make active/open
@@ -714,7 +789,7 @@ secondActiveHoldID := ""
                 }
                 IfWinNotExist, Pocket Casts Desktop
                 {
-                    RunWait, "C:\Users\Colto\Documents\WindowsAppLink\Pocket Casts Desktop"
+                    RunWait, "C:\Users\Colton\Documents\WindowsAppLink\Pocket Casts Desktop"
                     Return
                 } 
         ;VLC Player make active/open
@@ -771,7 +846,7 @@ secondActiveHoldID := ""
                     MsgBox,,, Starting Main Steam, 1
                     Process, close, steam.exe
                     ;location of .bat must be changed
-                    Run, "C:\Users\Colto\Documents\SteamMain.bat" ,,Hide
+                    Run, "C:\Users\Colton\Documents\SteamMain.bat" ,,Hide
                 }
                 return
         ;Steam Alt make active/open
@@ -787,7 +862,7 @@ secondActiveHoldID := ""
                     MsgBox,,, Starting Alt Steam, 1
                     Process, close, steam.exe
                     ;location of .bat must be changed
-                    Run, "C:\Users\Colto\Documents\SteamPBX.bat" ,,Hide
+                    Run, "C:\Users\Colton\Documents\SteamPBX.bat" ,,Hide
                     Return
                 }
                 Return
@@ -801,8 +876,8 @@ secondActiveHoldID := ""
                 }
                 IfWinNotExist, AMAKeyboardClient
                 {
-                    RunWait, "C:\Users\Colto\Documents\amag\amag\AMAG_EN\AMAG.exe" ,,Hide
-                    amagID := WinExist(ahk_exe "C:\Users\Colto\Documents\amag\amag\AMAG_EN\AMAG.exe")
+                    RunWait, "C:\Users\Colton\Documents\amag\amag\AMAG_EN\AMAG.exe" ,,Hide
+                    amagID := WinExist(ahk_exe "C:\Users\Colton\Documents\amag\amag\AMAG_EN\AMAG.exe")
                     WinActivate, ahk_id %amagID%
                     Return
                 }
@@ -821,19 +896,17 @@ secondActiveHoldID := ""
         ;Firefox Default Account open new tab
             ffNewTabMainLab:
                 profile := "-Main-" 
-                profileName := "default-release"
+                profileName := "default-release-1"
                 WinGet, this_ID, ID, %profile%
-                Runwait, cmd.exe /c start firefox.exe -p %profileName% -new-tab about:home ,,Hide
-                WinWaitClose, 
+                Runwait, C:\Program Files\Mozilla Firefox\firefox.exe -p %profileName% -new-tab about:home,,Hide 
                 WinActivate, ahk_id %this_ID%
                 Return        
         ;Firefox Alt Account open new tab
             ffNewTabAltLab:
                 profile := "-Hifi-" 
-                profileName := "HifiVox"
+                profileName := "default-nightly"
                 WinGet, this_ID, ID, %profile%
-                Runwait, cmd.exe /c start firefox.exe -p %profileName% -new-tab about:home ,,Hide
-                WinWaitClose, 
+                Runwait, C:\Program Files\Firefox Nightly\firefox.exe  -p %profileName% -new-tab about:home ,,Hide
                 WinActivate, ahk_id %this_ID%
                 Return     
         ;Chrome Main Account open new tab
@@ -842,7 +915,6 @@ secondActiveHoldID := ""
                 profileName := "default"
                 WinGet, this_ID, ID, %profile%
                 Runwait, cmd.exe /c start chrome.exe --args --profile-directory=%profileName% www.google.com  ,,Hide
-                WinWaitClose, 
                 WinActivate, ahk_id %this_ID%
                 Return 
         ;Chrome Work Account open new tab
@@ -851,10 +923,46 @@ secondActiveHoldID := ""
                 profileName := """profile 1"""
                 WinGet, this_ID, ID, %profile%
                 Runwait, cmd.exe /c start chrome.exe --args --profile-directory=%profileName% www.google.com  ,,Hide
-                WinWaitClose, 
                 WinActivate, ahk_id %this_ID%
                 Return  
     ;Volume Controls
+        ;Mute channels    
+            ;Mute/Unmute Focused volume
+                focusVolMuteLab: 
+                    return               
+            ;Mute/Unmute Media volume\
+                mediaVolMuteLab:
+                    return
+            ;Mute/Unmute Line In volume
+                lineVolMuteLab:
+                    RunWait, cmd.exe /c SoundVolumeView.exe /stab "" | GetNir "Volume Percent" "ProcessID= %LineInPID%" "Type=Application" "DeviceName= 3- USB Multi-Channel Audio Device" "Direction= Render" > VolumePercents/LineInPercent.txt ,,Hide
+                    FileReadLine, lineInPercentVal, VolumePercents/LineInPercent.txt, 1
+                    StringTrimRight, trimmedPercentVal, lineInPercentVal, 1
+                    If (trimmedPercentVal != 0.0)
+                    {
+                        lineInMutePercent := trimmedPercentVal
+                    }
+                    Else
+                    {
+                        MsgBox,,Notice, Line in channel is already muted, 1
+                        return
+                    }
+                    SoundGet, currSysVolStart
+                    percentAdjust := ((currSysVolStart/100) * (lineInMutePercent))/100
+                    If (lineInMutePercent = 0.0)
+                    {
+                        Run cmd.exe /c start nircmd.exe changeappvolume /%LineInPID% +%percentAdjust% ,,Hide                        
+                    }   
+                    Else
+                    {
+
+                        Run cmd.exe /c start nircmd.exe changeappvolume /%LineInPID% -1 ,,Hide
+                    }
+                    return
+            ;Mute/Unmute System volume
+                sysVolMuteLab:
+                    Send, {Volume_Mute}
+                    return
         ;focused application volumes
             ;focused application volume down 2%
                 focusVolDown2Lab:
@@ -1277,6 +1385,33 @@ secondActiveHoldID := ""
                 mainSysVolUp10Lab:
                     Send, {Volume_up 5}
                     Return
+    ;EQ and Sound Output
+        ;Switch output with EQ change
+            ;Set BTA30 Digital output/Peace EQ XM4
+                DOEQLab:
+                Run cmd.exe /c start nircmd.exe setdefaultsounddevice "Digital Output" 1 ,,Hide
+                Run cmd.exe /c start nircmd.exe setdefaultsounddevice "Digital Output" 2 ,,Hide
+                Send, {ShiftDown}{AltDown}{CtrlDown}{Numpad0}{CtrlUp}{AltUp}{ShiftUp}
+                return
+            ;Set Logitech Pro X output/Peace EQ Pro X
+                LPXEQLab:
+                Run cmd.exe /c start nircmd.exe setdefaultsounddevice "Pro X" 1 ,,Hide
+                Run cmd.exe /c start nircmd.exe setdefaultsounddevice "Pro X" 2 ,,Hide
+                Send, {ShiftDown}{AltDown}{CtrlDown}{Numpad1}{CtrlUp}{AltUp}{ShiftUp}
+                return
+            ;Set FiiO K5 Speaker output/Peace EQ 770 80ohm
+                K5770EQLab:
+                Run cmd.exe /c start nircmd.exe setdefaultsounddevice "K5 Pro" 1 ,,Hide
+                Run cmd.exe /c start nircmd.exe setdefaultsounddevice "K5 Pro" 2 ,,Hide
+                Send, {ShiftDown}{AltDown}{CtrlDown}{Numpad2}{CtrlUp}{AltUp}{ShiftUp}
+                return
+            ;Set FiiO K5 Speaker output/Peace EQ MK5
+                K5MK5EQLab:
+                Run cmd.exe /c start nircmd.exe setdefaultsounddevice "K5 Pro" 1 ,,Hide
+                Run cmd.exe /c start nircmd.exe setdefaultsounddevice "K5 Pro" 2 ,,Hide
+                Send, {ShiftDown}{AltDown}{CtrlDown}{Numpad3}{CtrlUp}{AltUp}{ShiftUp}
+                return  
+
 
 
 
