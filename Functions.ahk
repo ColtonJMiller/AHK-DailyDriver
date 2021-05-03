@@ -23,3 +23,39 @@ SectionHeader()
 
 	Return %line%
 }
+grabInputPID()
+{
+    tmpFile = ~~TaskListResult~~
+    RunWait %comspec% /c tasklist /svc > %tmpFile%,, Hide
+    FileRead taskList, %tmpFile%
+    FileDelete %tmpFile%
+
+    searchedImage = svchost.exe
+    searchedService = Audiosrv 
+    imageNameLen := StrLen(searchedImage)
+
+    Loop Parse, taskList, `n, `r
+    {
+        StringLeft imageName, A_LoopField, %imageNameLen%
+        If (imageName = searchedImage)
+        {
+            StringMid pid, A_LoopField, 29, 7
+            ;MsgBox %pid% - %A_LoopField%
+        }  
+        IfInString A_LoopField, %searchedService%
+        {
+            bFound := true
+            Break
+        }
+    }
+    StringReplace, pidNoSpace, pid, %A_Space%,,All
+    If (bFound)
+    {
+        ;MsgBox Searched PID is: (%pidNoSpace%)
+    }
+    Else
+    {
+        MsgBox no PID found...
+    }
+    Return pidNoSpace
+}

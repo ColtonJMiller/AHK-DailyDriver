@@ -15,55 +15,15 @@
 
 SetTitleMatchMode, 2
 #Include, Functions.ahk
-grabInputPID()
-{
-    tmpFile = ~~TaskListResult~~
-    RunWait %comspec% /c tasklist /svc > %tmpFile%,, Hide
-    ; Read fast and delete, may even avoid writting to disk...
-    FileRead taskList, %tmpFile%
-    FileDelete %tmpFile%
-
-    searchedImage = svchost.exe
-    searchedService = Audiosrv ; Just test value, put what you need
-    imageNameLen := StrLen(searchedImage)
-
-    Loop Parse, taskList, `n, `r
-    {
-        StringLeft imageName, A_LoopField, %imageNameLen%
-        If (imageName = searchedImage)
-        {
-            StringMid pid, A_LoopField, 29, 7
-            ;MsgBox %pid% - %A_LoopField%
-        }  
-        IfInString A_LoopField, %searchedService%
-        {
-            ; /!\ I suppose the service name can be found only for the searched image
-            ; Otherwise, a stronger check must be made
-            bFound := true
-            Break
-        }
-    }
-    StringReplace, pidNoSpace, pid, %A_Space%,,All
-    If (bFound)
-    {
-        ;MsgBox Searched PID is: (%pidNoSpace%)
-    }
-    Else
-    {
-        MsgBox Oops, no PID found...
-    }
-    Return pidNoSpace
-}
-
-LineInPID := grabInputPID()
-;MsgBox, %LineInPID%
 
 ;Global variables
+LineInPID := grabInputPID()
 firstActiveHoldCount := 0
 firstActiveHoldID := ""
 secondActiveHoldCount := 0
 secondActiveHoldID := ""
-lineInMutePercent := 0
+FocusMuteHold := 0
+lineInMuteHold := 0
 ;HOTKEYS 
     ;HOTKEYS Media Keys 
         ;Track control
@@ -185,17 +145,26 @@ lineInMutePercent := 0
             hotkey, %chromeNewTabWorkHK%, chromeNewTabWorkLab
     ;HOTKEYS Volume controls
         ;Mute Channels
-            ;Mute/Unmute Focused volume
-                focusVolMuteHK := "<!F14"
+            ;Mute Focused volume
+                focusVolMuteHK := "<!F13"
                 hotkey, %focusVolMuteHK%, focusVolMuteLab
-            ;Mute/Unmute Media volume
-                mediaVolMuteHK := "<!F16"
+            ;Unmute/Restore Focused volume
+                focusVolUnmuteHK := "<!F14"
+                hotkey, %focusVolUnmuteHK%, focusVolUnmuteLab
+            ;Mute Media volume
+                mediaVolMuteHK := "<!F15"
                 hotkey, %mediaVolMuteHK%, mediaVolMuteLab
-            ;Mute/Unmute Line In volume
-                lineVolMuteHK := "<!F18"
+            ;Unmute/Restore Media volume
+                mediaVolUnmuteHK := "<!F16"
+                hotkey, %mediaVolUnmuteHK%, mediaVolUnmuteLab
+            ;Mute Line In volume
+                lineVolMuteHK := "<!F17"
                 hotkey, %lineVolMuteHK%, lineVolMuteLab
-            ;Mute/Unmute System volume
-                sysVolMuteHK := "<!F20"
+            ;Unmute/Restore Line In volume
+                lineVolUnmuteHK := "<!F18"
+                hotkey, %lineVolUnmuteHK%, lineVolUnmuteLab
+            ;Mute/Unmute System volume 
+                sysVolMuteHK := "<!F19"
                 hotkey, %sysVolMuteHK%, sysVolMuteLab
         ;focused application volumes
             ;focused application volume down 2%
@@ -287,7 +256,7 @@ lineInMutePercent := 0
             ;Set FiiO K5 Speaker output/Peace EQ MK5  
                 K5MK5EQHK := "<!>^F22"
                 hotkey, %K5MK5EQHK%, K5MK5EQLab  
-    Return
+        Return
 ;Main code
     ;Media Keys
         ;Track Control
@@ -927,38 +896,131 @@ lineInMutePercent := 0
                 Return  
     ;Volume Controls
         ;Mute channels    
-            ;Mute/Unmute Focused volume
+            ;Mute Focused volume
                 focusVolMuteLab: 
-                    return               
-            ;Mute/Unmute Media volume\
+                    txtFile := "VolumePercents/FocusedPercent.txt"
+                    ActiveAHKID := WinExist("A")
+                    WinGet, ActivePID, PID, ahk_id %ActiveAHKID%
+                    Runwait, cmd.exe /c SoundVolumeView.exe /stab "" | GetNir "Volume Percent" "ProcessID= %ActivePID%" > %txtFile% ,,Hide 
+                    FileReadLine, PercentVal, %txtFile%, 1
+                    StringTrimRight, trimmedPercentVal, PercentVal, 1
+                    FocusMuteHold := trimmedPercentVal /100
+                    Run cmd.exe /c start nircmd.exe changeappvolume /%ActivePID% -1 ,,Hide                   
+                    return     
+            ;Unmute/Restore Focused volume
+                focusVolUnmuteLab:
+                    Run cmd.exe /c start nircmd.exe changeappvolume /%ActivePID% +%FocusMuteHold% ,,Hide 
+                    return                  
+            ;Mute Media volume
                 mediaVolMuteLab:
+                    FileDelete, VolumePercents/MediaHold.txt
+                    IfWinExist, -Main-
+                    {
+                    txtFile := "VolumePercents/MainFirefoxPercents.txt"
+                    WinGet, ActivePID, PID, -Main-
+                    Runwait, cmd.exe /c SoundVolumeView.exe /stab "" | GetNir "Volume Percent" "ProcessID= %ActivePID%" > %txtFile% ,,Hide 
+                    FileReadLine, PercentVal, %txtFile%, 1
+                    StringTrimRight, trimmedPercentVal, PercentVal, 1
+                    decimalPercent := trimmedPercentVal /100
+                    FileAppend, %ActivePID%\%decimalPercent%`n, VolumePercents/MediaHold.txt
+                    Run cmd.exe /c start nircmd.exe changeappvolume /%ActivePID% -1 ,,Hide
+                    }
+                    IfWinExist, -Hifi-
+                    {
+                    txtFile := "VolumePercents/HifiFirefoxPercents.txt"
+                    WinGet, ActivePID, PID, -Hifi-
+                    Runwait, cmd.exe /c SoundVolumeView.exe /stab "" | GetNir "Volume Percent" "ProcessID= %ActivePID%" > %txtFile% ,,Hide 
+                    FileReadLine, PercentVal, %txtFile%, 1
+                    StringTrimRight, trimmedPercentVal, PercentVal, 1
+                    decimalPercent := trimmedPercentVal /100
+                    FileAppend, %ActivePID%\%decimalPercent%`n, VolumePercents/MediaHold.txt 
+                    Run cmd.exe /c start nircmd.exe changeappvolume /%ActivePID% -1 ,,Hide  
+                    }
+                    IfWinExist, Google Chrome
+                    {
+                    txtFile := "VolumePercents/ChromePercents.txt"
+                    WinGet, ActivePID, PID, Google Chrome
+                    Runwait, cmd.exe /c SoundVolumeView.exe /stab "" | GetNir "Volume Percent" "ProcessID= %ActivePID%" > %txtFile% ,,Hide 
+                    FileReadLine, PercentVal, %txtFile%, 1
+                    StringTrimRight, trimmedPercentVal, PercentVal, 1
+                    decimalPercent := trimmedPercentVal /100
+                    FileAppend, %ActivePID%\%decimalPercent%`n, VolumePercents/MediaHold.txt
+                    Run cmd.exe /c start nircmd.exe changeappvolume /%ActivePID% -1 ,,Hide   
+                    }
+                    IfWinExist, ahk_exe TIDAL.exe
+                    {
+                    txtFile := "VolumePercents/TidalPercents.txt"
+                    WinGet, ActivePID, PID, ahk_exe TIDAL.exe
+                    Runwait, cmd.exe /c SoundVolumeView.exe /stab "" | GetNir "Volume Percent" "ProcessID= %ActivePID%" > %txtFile% ,,Hide 
+                    FileReadLine, PercentVal, %txtFile%, 1
+                    StringTrimRight, trimmedPercentVal, PercentVal, 1
+                    decimalPercent := trimmedPercentVal /100
+                    FileAppend, %ActivePID%\%decimalPercent%`n, VolumePercents/MediaHold.txt 
+                    Run cmd.exe /c start nircmd.exe changeappvolume /%ActivePID% -1 ,,Hide  
+                    }
+                    IfWinExist, ahk_exe Spotify.exe
+                    {
+                    txtFile := "VolumePercents/SpotifyPercents.txt"
+                    WinGet, ActivePID, PID, ahk_exe Spotify.exe
+                    Runwait, cmd.exe /c SoundVolumeView.exe /stab "" | GetNir "Volume Percent" "ProcessID= %ActivePID%" > %txtFile% ,,Hide 
+                    FileReadLine, PercentVal, %txtFile%, 1
+                    StringTrimRight, trimmedPercentVal, PercentVal, 1
+                    decimalPercent := trimmedPercentVal /100
+                    FileAppend, %ActivePID%\%decimalPercent%`n, VolumePercents/MediaHold.txt
+                    Run cmd.exe /c start nircmd.exe changeappvolume /%ActivePID% -1 ,,Hide   
+                    }
+                    IfWinExist, Pocket Casts
+                    {
+                    txtFile := "VolumePercents/PocketCastsPercents.txt"
+                    WinGet, ActivePID, PID, Pocket Casts
+                    Runwait, cmd.exe /c SoundVolumeView.exe /stab "" | GetNir "Volume Percent" "ProcessID= %ActivePID%" > %txtFile% ,,Hide 
+                    FileReadLine, PercentVal, %txtFile%, 1
+                    StringTrimRight, trimmedPercentVal, PercentVal, 1
+                    decimalPercent := trimmedPercentVal /100
+                    FileAppend, %ActivePID%\%decimalPercent%`n, VolumePercents/MediaHold.txt
+                    Run cmd.exe /c start nircmd.exe changeappvolume "Pocket Casts.exe" -1 ,,Hide   
+                    }
+                    IfWinExist, VLC media player
+                    {
+                    txtFile := "VolumePercents/VLCPercents.txt"
+                    WinGet, ActivePID, PID, VLC media player
+                    Runwait, cmd.exe /c SoundVolumeView.exe /stab "" | GetNir "Volume Percent" "ProcessID= %ActivePID%" > %txtFile% ,,Hide 
+                    FileReadLine, PercentVal, %txtFile%, 1
+                    StringTrimRight, trimmedPercentVal, PercentVal, 1
+                    decimalPercent := trimmedPercentVal /100
+                    FileAppend, %ActivePID%\%decimalPercent%`n, VolumePercents/MediaHold.txt
+                    Run cmd.exe /c start nircmd.exe changeappvolume /%ActivePID% -1 ,,Hide   
+                    } 
+                    return    
+            ;Unmute/Restore Media volume
+                mediaVolUnmuteLab:
+                    Loop, Read, VolumePercents/MediaHold.txt
+                    {
+                        StringSplit, HoldArr, A_LoopReadLine, \
+                        WinGetTitle, currTitle, ahk_pid %HoldArr1%
+                        If (currTitle = "Pocket Casts Desktop")
+                        {
+                            Run cmd.exe /c start nircmd.exe changeappvolume "Pocket Casts.exe" +%HoldArr2% ,,Hide  
+                        }
+                        Else
+                        {
+                            Run cmd.exe /c start nircmd.exe changeappvolume /%HoldArr1% +%HoldArr2% ,,Hide 
+                        }
+                    }
                     return
-            ;Mute/Unmute Line In volume
+            ;Mute Line In volume
                 lineVolMuteLab:
-                    RunWait, cmd.exe /c SoundVolumeView.exe /stab "" | GetNir "Volume Percent" "ProcessID= %LineInPID%" "Type=Application" "DeviceName= 3- USB Multi-Channel Audio Device" "Direction= Render" > VolumePercents/LineInPercent.txt ,,Hide
-                    FileReadLine, lineInPercentVal, VolumePercents/LineInPercent.txt, 1
-                    StringTrimRight, trimmedPercentVal, lineInPercentVal, 1
-                    If (trimmedPercentVal != 0.0)
-                    {
-                        lineInMutePercent := trimmedPercentVal
-                    }
-                    Else
-                    {
-                        MsgBox,,Notice, Line in channel is already muted, 1
-                        return
-                    }
-                    SoundGet, currSysVolStart
-                    percentAdjust := ((currSysVolStart/100) * (lineInMutePercent))/100
-                    If (lineInMutePercent = 0.0)
-                    {
-                        Run cmd.exe /c start nircmd.exe changeappvolume /%LineInPID% +%percentAdjust% ,,Hide                        
-                    }   
-                    Else
-                    {
-
-                        Run cmd.exe /c start nircmd.exe changeappvolume /%LineInPID% -1 ,,Hide
-                    }
-                    return
+                    txtFile := "VolumePercents/LineInPercent.txt"
+                    Runwait, cmd.exe /c SoundVolumeView.exe /stab "" | GetNir "Volume Percent" "ProcessID= %LineInPID%" > %txtFile% ,,Hide 
+                    FileReadLine, PercentVal, %txtFile%, 1
+                    StringTrimRight, trimmedPercentVal, PercentVal, 1
+                    lineInMuteHold := trimmedPercentVal /100
+                    Run cmd.exe /c start nircmd.exe changeappvolume /%LineInPID% -1 ,,Hide                   
+                    return     
+            ;Unmute/Restore Line In volume
+                lineVolUnmuteLab:
+                    Run cmd.exe /c start nircmd.exe changeappvolume /%LineInPID% +%lineInMuteHold% ,,Hide 
+                    return            
             ;Mute/Unmute System volume
                 sysVolMuteLab:
                     Send, {Volume_Mute}
@@ -1411,8 +1473,3 @@ lineInMutePercent := 0
                 Run cmd.exe /c start nircmd.exe setdefaultsounddevice "K5 Pro" 2 ,,Hide
                 Send, {ShiftDown}{AltDown}{CtrlDown}{Numpad3}{CtrlUp}{AltUp}{ShiftUp}
                 return  
-
-
-
-
-  
