@@ -59,3 +59,12 @@ grabInputPID()
     }
     Return pidNoSpace
 }
+getLampBrightness()
+{
+  StringReplace, fixedDocPath, A_MyDocuments, \, /, All]
+  brightnessTxtFile := fixedDocPath . "/AHKPercentHolds/bright.txt"
+  Runwait cmd.exe /c kasa --bulb --alias Coltons_Lamp brightness > %brightnessTxtFile% ,,Hide
+  FileReadLine, brightLine, %brightnessTxtFile%, 5
+  StringRight, brightVal, brightLine, 2
+  return brightVal
+}

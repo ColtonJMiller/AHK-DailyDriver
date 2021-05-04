@@ -1,3 +1,4 @@
+;Kasa light integration https://github.com/python-kasa/python-kasa
  ;Koolertron 23 key
 ;R3 Macros
 ;M1 = >^F19 
@@ -17,13 +18,15 @@ SetTitleMatchMode, 2
 #Include, Functions.ahk
 
 ;Global variables
-LineInPID := grabInputPID()
-firstActiveHoldCount := 0
-firstActiveHoldID := ""
-secondActiveHoldCount := 0
-secondActiveHoldID := ""
-FocusMuteHold := 0
-lineInMuteHold := 0
+    StringReplace, fixedDocPath, A_MyDocuments, \, /, All]
+    LineInPID := grabInputPID()
+    firstActiveHoldCount := 0
+    firstActiveHoldID := ""
+    secondActiveHoldCount := 0
+    secondActiveHoldID := ""
+    FocusMuteHold := 0
+    lineInMuteHold := 0
+    lampBrightVal := 1
 ;HOTKEYS 
     ;HOTKEYS Media Keys 
         ;Track control
@@ -94,12 +97,6 @@ lineInMuteHold := 0
         ;Firefox Alt Account make active/cycle tabs
             ffOpenAltHK := ">^F20"
             hotkey, %ffOpenAltHK%, ffOpenAltLab
-        ;Chrome Main Account make active/cycle tabs
-            chromeOpenMainHK := "<+>^F19"
-            hotkey, %chromeOpenMainHK%, chromeOpenMainLab
-        ;Chrome Work Account make active/cycle tabs
-            chromeOpenWorkHK := "<+>^F20"
-            hotkey, %chromeOpenWorkHK%, chromeOpenWorkLab
         ;Visual Studio make active/cycle tabs
             VSCodeOpenHK := ">^F21"
             hotkey, %VSCodeOpenHK%, VSCodeOpenLab
@@ -137,12 +134,6 @@ lineInMuteHold := 0
         ;Firefox Alt Account open new tab
             ffNewTabAltHK := ">+>^F20"
             hotkey, %ffNewTabAltHK%, ffNewTabAltLab
-        ;Chrome Main Account open new tab
-            chromeNewTabMainHK := "<^>^F19"
-            hotkey, %chromeNewTabMainHK%, chromeNewTabMainLab
-        ;Chrome Work Account open new tab
-            chromeNewTabWorkHK := "<^>^F20"
-            hotkey, %chromeNewTabWorkHK%, chromeNewTabWorkLab
     ;HOTKEYS Volume controls
         ;Mute Channels
             ;Mute Focused volume
@@ -255,7 +246,24 @@ lineInMuteHold := 0
                 hotkey, %K5770EQHK%, K5770EQLab  
             ;Set FiiO K5 Speaker output/Peace EQ MK5  
                 K5MK5EQHK := "<!>^F22"
-                hotkey, %K5MK5EQHK%, K5MK5EQLab  
+                hotkey, %K5MK5EQHK%, K5MK5EQLab 
+    ;HOTKEYS Kasa lighting
+        ;Main room Light bulb on/off + brightness
+            ;Turn off bulb
+                lampOffHK := ">!F21"
+                hotkey, %lampOffHK%, lampOffLab              
+            ;Turn on/brightness 1%
+                lamp1HK := ">!F22"
+                hotkey, %lamp1HK%, lamp1Lab 
+            ;Turn on/brightness down 10%
+                lampBrightDownHK := ">!F23"
+                hotkey, %lampBrightDownHK%, lampBrightDownLab 
+            ;Turn on/brightness up 10%
+                lampBrightUpHK := ">!F24"
+                hotkey, %lampBrightUpHK%, lampBrightUpLab  
+            ;Lamp Gui
+                lampGUIHK := "<+<^<!F12"
+                hotkey, %lampGUIHK%, lampGUILab
         Return
 ;Main code
     ;Media Keys
@@ -289,10 +297,6 @@ lineInMuteHold := 0
                 Return
         ;Active window check
             activeCheckLab:
-                soundVar := "svchost.exe%b{ac704d33-4b02-492c-a578-f52c49993ce0}"
-                WinGet, SoundPid, PID, ahk_exe %soundVar%
-                MsgBox, %SoundPid%
-                noneStg := "None"
                 this_id := WinExist("A")
                 WinGetTitle, this_title, ahk_id %this_id%
                 WinGetClass, this_class, ahk_id %this_id%
@@ -317,7 +321,7 @@ lineInMuteHold := 0
         ;All active Windows
             allActiveLab:
                 WinGet,Windows,List
-                MsgBox, %Windows%
+                MsgBox, %Windows% Non Hidden Windows
                 Loop,%Windows%
                 {
                     this_id := "ahk_id " . Windows%A_Index%
@@ -336,11 +340,8 @@ lineInMuteHold := 0
                 return
         ;Open helper GUI
             helperGUILab:
-            IfWinNotExist, Koolertron Keybinds 
-            {
                 RunWait, HelperGUI.ahk
-            }
-            Return
+                Return
     ;Application min, max, and monitor cycle
         ;Maximize or restore toggle for active window 
             maxToggleLab:
@@ -361,122 +362,18 @@ lineInMuteHold := 0
                 Return
         ;Set Monitor 1 only
             monitor1OnlyLab:
-                FileDelete, AllWinPos.txt
-                SysGet, numOfMonitors, MonitorCount
-                SysGet, priMonitor, MonitorPrimary
-                SysGet, mon1, Monitor, 1
-                SysGet, mon2, Monitor, 2
-                WinGet,Windows,List
-                ;MsgBox, %Windows%
-                Loop,%Windows%
-                {
-                    this_id := "ahk_id " . Windows%A_Index%
-                    WinGetTitle, this_title, %this_id%
-                    WinGetClass, this_class, %this_id%
-                    WinGet, this_PID, PID, %this_id%
-                    WinGet, Winstate, MinMax, %this_id%
-                    
-                    ;MsgBox, Title = %this_title%`n Class = %this_class%`n PID = %this_PID%
-                    WinGetPos, currX, currY, currH, currW, %this_id%
-                    ;MsgBox, %currX%
-                    FileAppend, %currX%\%currY%\%currH%\%currW%\%Winstate%\%this_title%`n, AllWinPos.txt
-                }
-                ;MsgBox, Monitor 1
                 Run cmd.exe /c C:\Windows\System32\DisplaySwitch.exe /internal ,,Hide
                 Return
         ;Set monitor 2 only
             monitor2OnlyLab:
-                FileDelete, AllWinPos.txt
-                SysGet, numOfMonitors, MonitorCount
-                SysGet, priMonitor, MonitorPrimary
-                SysGet, mon1, Monitor, 1
-                SysGet, mon2, Monitor, 2
-                WinGet,Windows,List
-                ;MsgBox, %Windows%
-                Loop,%Windows%
-                {
-                    this_id := "ahk_id " . Windows%A_Index%
-                    WinGetTitle, this_title, %this_id%
-                    WinGetClass, this_class, %this_id%
-                    WinGet, this_PID, PID, %this_id%
-                    WinGet, Winstate, MinMax, %this_id%
-                    
-                    ;MsgBox, Title = %this_title%`n Class = %this_class%`n PID = %this_PID%
-                    WinGetPos, currX, currY, currH, currW, %this_id%
-                    ;MsgBox, %currX%
-                    FileAppend, %currX%\%currY%\%currH%\%currW%\%Winstate%\%this_title%`n, AllWinPos.txt
-                }
-                ;MsgBox, Monitor 2
                 Run cmd.exe /c C:\Windows\System32\DisplaySwitch.exe /external ,,Hide
                 Return
         ;Set extended monitor layout
             monitorExtendLab:
-                ;MsgBox, Monitor Extend
                 RunWait, cmd.exe /c C:\Windows\System32\DisplaySwitch.exe /extend ,,Hide
-                Sleep, 3000
-                ;Loop, Read, AllWinPos.txt
-                ;{
-                ;    currInnerActive := WinActive("A")
-                ;    ;MsgBox, %A_LoopReadLine%
-                ;    StringSplit, HoldArr, A_LoopReadLine, \
-                ;    If (HoldArr6 != "Program Manager")
-                ;    {
-                ;        If (HoldArr6 != "Switch USB")
-                ;        {
-                ;            If (HoldArr6)
-                ;            {
-                ;                If (HoldArr2 < -1080)
-                ;                {
-                ;                ;MsgBox %HoldArr6% met condition with %HoldArr1% %HoldArr2%
-                ;                WinGetPos, currInnerX, currInnerY, currInnerH, currInnerW, %HoldArr7%
-                ;                WinGet, WinState, MinMax, %HoldArr7%
-                ;                ;MsgBox %HoldArr6%`n x: %currInnerX%`n y: %currInnerY%
-                ;                    WinActivate, %HoldArr6%
-                ;                    Send, {LWinDown}{ShiftDown}{Left}{ShiftUp}{LWinUp}
-                ;                    If (WinState != 1)
-                ;                    {
-                ;                        WinMaximize, %HoldArr6%
-                ;                    }
-                ;                    WinActivate, ahk_id currInnerActive
-                ;                }
-                ;            }
-                ;        }
-                ;    }
-                ;}
                 Return
         ;Restore window config
             restoreWinPosLab:
-                Loop, Read, AllWinPos.txt
-                {
-                    currInnerActive := WinActive("A")
-                    ;MsgBox, %A_LoopReadLine%
-                    StringSplit, HoldArr, A_LoopReadLine, \
-                    If (HoldArr6 != "Program Manager")
-                    {
-                        If (HoldArr6 != "Switch USB")
-                        {
-                            If (HoldArr6)
-                            {
-                                If (HoldArr1 < -9 ||HoldArr2 < -9)
-                                {
-                                    ;MsgBox %HoldArr6% met condition with %HoldArr1% %HoldArr2%
-                                    WinGetPos, currInnerX, currInnerY, currInnerH, currInnerW, %HoldArr7%
-                                    ;MsgBox %HoldArr6%`n x: %currInnerX%`n y: %currInnerY%
-                                    If (currInnerY < -9)
-                                    {
-                                        ;MsgBox break met
-                                    }
-                                    Else
-                                    {
-                                        WinActivate, %HoldArr6%
-                                        Send, {LWinDown}{ShiftDown}{Left}{ShiftUp}{LWinUp}
-                                        WinActivate, ahk_id currInnerActive
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
                 Return            
     ;Application process kill  
         ;Kill current active process/close tab
@@ -485,11 +382,6 @@ lineInMuteHold := 0
                 WinGetClass, this_class, ahk_id %current%
                 WinGetTitle, this_title, ahk_id %current%
                 If (this_class = "MozillaWindowClass")
-                {
-                    Send, {CtrlDown}{F4}{CtrlUp}
-                    Return
-                }
-                If (this_title ~= "Visual Studio Code")
                 {
                     Send, {CtrlDown}{F4}{CtrlUp}
                     Return
@@ -642,60 +534,6 @@ lineInMuteHold := 0
                     Return
                 } 
                 Return
-        ;Chrome Main Account make active/cycle tabs
-            chromeOpenMainLab:
-                profile := "|Main|"
-                profileName := "Default"
-                IfWinExist,  %profile%
-                {
-                    WinGet, actCheck, ID, %profile%
-                    currActive := WinExist("A")              
-                    If (currActive = actCheck)
-                    {
-                        Send, {Ctrl Down}{Tab}{Ctrl Up} 
-                        return                  
-                    }
-                    Else 
-                    {
-                        WinActivate, ahk_id %actCheck%
-                        Return
-                    }
-                    WinActivate, ahk_id %mainAct%
-                    return           
-                }
-                IfWinNotExist, %profile% 
-                {
-                    Run, cmd.exe /c start chrome.exe --args --profile-directory=%profileName%  ,,Hide
-                    WinWait, %profile%
-                    Return                
-                }           
-        ;Chrome Work Account make active/cycle tabs
-            chromeOpenWorkLab:
-                profile := "|Work|"
-                profileName := """profile 1"""
-                IfWinExist,  %profile%
-                {
-                    WinGet, actCheck, ID, %profile%
-                    currActive := WinExist("A")              
-                    If (currActive = actCheck)
-                    {
-                        Send, {Ctrl Down}{Tab}{Ctrl Up} 
-                        return                  
-                    }
-                    Else 
-                    {
-                        WinActivate, ahk_id %actCheck%
-                        Return
-                    }
-                    WinActivate, ahk_id %mainAct%
-                    return           
-                }
-                IfWinNotExist, %profile% 
-                {
-                    Run, cmd.exe /c start chrome.exe --args --profile-directory=%profileName%  ,,Hide
-                    WinWait, %profile%
-                    Return                
-                }  
         ;Visual Studio make active/cycle tabs
             VSCodeOpenLab:
                 profile := "Visual Studio Code"
@@ -731,7 +569,7 @@ lineInMuteHold := 0
                 }
                 IfWinNotExist, ahk_exe TIDAL.exe
                 {
-                    Run, "C:\Users\Colton\AppData\Local\TIDAL\TIDAL.exe" ,,Hide
+                    Runwait, "C:\Users\Colton\AppData\Local\TIDAL\TIDAL.exe" ,,Hide
                     Return
                 } 
                 Return
@@ -878,123 +716,185 @@ lineInMuteHold := 0
                 Runwait, C:\Program Files\Firefox Nightly\firefox.exe  -p %profileName% -new-tab about:home ,,Hide
                 WinActivate, ahk_id %this_ID%
                 Return     
-        ;Chrome Main Account open new tab
-            chromeNewTabMainLab:
-                profile := "|Main|" 
-                profileName := "default"
-                WinGet, this_ID, ID, %profile%
-                Runwait, cmd.exe /c start chrome.exe --args --profile-directory=%profileName% www.google.com  ,,Hide
-                WinActivate, ahk_id %this_ID%
-                Return 
-        ;Chrome Work Account open new tab
-            chromeNewTabWorkLab:
-                profile := "|Work|" 
-                profileName := """profile 1"""
-                WinGet, this_ID, ID, %profile%
-                Runwait, cmd.exe /c start chrome.exe --args --profile-directory=%profileName% www.google.com  ,,Hide
-                WinActivate, ahk_id %this_ID%
-                Return  
     ;Volume Controls
         ;Mute channels    
             ;Mute Focused volume
                 focusVolMuteLab: 
-                    txtFile := "VolumePercents/FocusedPercent.txt"
+                    SoundViewtxtFile := fixedDocPath . "/AHKPercentHolds/FocusedPercent.txt"
+                    FocusedAppHoldFile := fixedDocPath . "/AHKPercentHolds/FocusedHold.txt"
                     ActiveAHKID := WinExist("A")
                     WinGet, ActivePID, PID, ahk_id %ActiveAHKID%
-                    Runwait, cmd.exe /c SoundVolumeView.exe /stab "" | GetNir "Volume Percent" "ProcessID= %ActivePID%" > %txtFile% ,,Hide 
-                    FileReadLine, PercentVal, %txtFile%, 1
+                    If (FocusMuteHold != 0)
+                    {
+                        Run cmd.exe /c start nircmd.exe changeappvolume /%ActivePID% -1 ,,Hide
+                        return
+                    }
+                    Runwait, cmd.exe /c SoundVolumeView.exe /stab "" | GetNir "Volume Percent" "ProcessID= %ActivePID%" > %SoundViewtxtFile% ,,Hide 
+                    FileReadLine, PercentVal, %SoundViewtxtFile%, 1
                     StringTrimRight, trimmedPercentVal, PercentVal, 1
-                    FocusMuteHold := trimmedPercentVal /100
-                    Run cmd.exe /c start nircmd.exe changeappvolume /%ActivePID% -1 ,,Hide                   
+                    TempFocusMuteHold := trimmedPercentVal /100
+                    IfExist, %FocusedAppHoldFile%
+                    {
+                        Loop, %FocusedAppHoldFile%
+                        {
+                            If (A_LoopFileSize = 0)
+                            {
+                                FileAppend, %ActivePID%\%TempFocusMuteHold%`n, %FocusedAppHoldFile% 
+                                return  
+                            }
+                        }
+                        Loop, Read, %FocusedAppHoldFile%
+                        {
+                            StringSplit, HoldArr, A_LoopReadLine, \
+                            If (HoldArr1 = ActivePID && TempFocusMuteHold != 0)
+                            {
+                                MsgBox, HoldArr1 = Active PID && Current volume of Focused app is not 0
+                                
+                                Run cmd.exe /c start nircmd.exe changeappvolume /%ActivePID% -1 ,,Hide                               
+                                return
+                            }                            
+                            If (HoldArr1 = ActivePID && TempFocusMuteHold = 0)
+                            {
+                                MsgBox, HoldArr1 = Active PID && Current volume of Focused app is 0
+                                ;because current value is already zero do not change the current written value channel is already muted so just return
+                                return
+                            }
+                        }
+                        FileAppend, %ActivePID%\%TempFocusMuteHold%`n, %FocusedAppHoldFile% 
+                        return
+                    }
+                    IfNotExist, %FocusedAppHoldFile%
+                    {
+                        MsgBox,, Notice, Focused App Hold File Not Found. Creating one now. Rerun Mute, 2
+                        FileAppend,, %FocusedAppHoldFile%  
+                        return                      
+                    }
+                    ;IfExist, %FocusedAppHoldFile%
+                    ;{
+                    ;    Loop, %FocusedAppHoldFile%
+                    ;    {
+                    ;        MsgBox, looping
+                    ;        If (A_LoopFileSize = 0)
+                    ;        {
+                    ;            MsgBox, FileSize = 0
+                    ;            FileAppend, %ActivePID%\%TempFocusMuteHold%`n, %FocusedAppHoldFile%                                
+                    ;        }
+                    ;    }
+                    ;    Loop, Read, %FocusedAppHoldFile%
+                    ;    {
+                    ;        StringSplit, HoldArr, A_LoopReadLine, \
+                    ;        WinGetTitle, currTitle, ahk_pid %HoldArr1%
+                    ;        If (HoldArr1 = ActivePID)
+                    ;        {
+                    ;            MsgBox, HoldArr1 = ActivePID
+                    ;            return
+                    ;        }
+                    ;        Else
+                    ;        {
+                    ;            FileAppend, %ActivePID%\%TempFocusMuteHold%`n, %FocusedAppHoldFile% 
+                    ;        }
+                    ;    }
+                    ;}
+                    ;IfNotExist, %FocusedAppHoldFile%
+                    ;{
+                    ;
+                    ;    MsgBox,, Notice, Focused App Hold File Not Found
+                    ;    FileAppend,, %FocusedAppHoldFile%
+                    ;    Run cmd.exe /c start nircmd.exe changeappvolume /%ActivePID% -1 ,,Hide  
+                    ;}           
+                    ;FileDelete, %SoundViewtxtFile%  
                     return     
             ;Unmute/Restore Focused volume
                 focusVolUnmuteLab:
-                    Run cmd.exe /c start nircmd.exe changeappvolume /%ActivePID% +%FocusMuteHold% ,,Hide 
+                    Run cmd.exe /c start nircmd.exe changeappvolume /%ActivePID% +%FocusMuteHold% ,,Hide
+                    FocusMuteHold := 0
                     return                  
             ;Mute Media volume
                 mediaVolMuteLab:
-                    FileDelete, VolumePercents/MediaHold.txt
+                    MediaHoldFilePath := fixedDocPath . "/AHKPercentHolds/MediaHold.txt"
+                    FileDelete, %MediaHoldFilePath%
                     IfWinExist, -Main-
                     {
-                    txtFile := "VolumePercents/MainFirefoxPercents.txt"
+                    txtFile := fixedDocPath . "/AHKPercentHolds/MainFirefoxPercents.txt"
                     WinGet, ActivePID, PID, -Main-
                     Runwait, cmd.exe /c SoundVolumeView.exe /stab "" | GetNir "Volume Percent" "ProcessID= %ActivePID%" > %txtFile% ,,Hide 
                     FileReadLine, PercentVal, %txtFile%, 1
                     StringTrimRight, trimmedPercentVal, PercentVal, 1
                     decimalPercent := trimmedPercentVal /100
-                    FileAppend, %ActivePID%\%decimalPercent%`n, VolumePercents/MediaHold.txt
+                    FileAppend, %ActivePID%\%decimalPercent%`n, %MediaHoldFilePath%
                     Run cmd.exe /c start nircmd.exe changeappvolume /%ActivePID% -1 ,,Hide
                     }
                     IfWinExist, -Hifi-
                     {
-                    txtFile := "VolumePercents/HifiFirefoxPercents.txt"
+                    txtFile := fixedDocPath . "/AHKPercentHolds/HifiFirefoxPercents.txt"
                     WinGet, ActivePID, PID, -Hifi-
                     Runwait, cmd.exe /c SoundVolumeView.exe /stab "" | GetNir "Volume Percent" "ProcessID= %ActivePID%" > %txtFile% ,,Hide 
                     FileReadLine, PercentVal, %txtFile%, 1
                     StringTrimRight, trimmedPercentVal, PercentVal, 1
                     decimalPercent := trimmedPercentVal /100
-                    FileAppend, %ActivePID%\%decimalPercent%`n, VolumePercents/MediaHold.txt 
+                    FileAppend, %ActivePID%\%decimalPercent%`n, %MediaHoldFilePath% 
                     Run cmd.exe /c start nircmd.exe changeappvolume /%ActivePID% -1 ,,Hide  
                     }
                     IfWinExist, Google Chrome
                     {
-                    txtFile := "VolumePercents/ChromePercents.txt"
+                    txtFile := fixedDocPath . "/AHKPercentHolds/ChromePercents.txt"
                     WinGet, ActivePID, PID, Google Chrome
                     Runwait, cmd.exe /c SoundVolumeView.exe /stab "" | GetNir "Volume Percent" "ProcessID= %ActivePID%" > %txtFile% ,,Hide 
                     FileReadLine, PercentVal, %txtFile%, 1
                     StringTrimRight, trimmedPercentVal, PercentVal, 1
                     decimalPercent := trimmedPercentVal /100
-                    FileAppend, %ActivePID%\%decimalPercent%`n, VolumePercents/MediaHold.txt
+                    FileAppend, %ActivePID%\%decimalPercent%`n, %MediaHoldFilePath%
                     Run cmd.exe /c start nircmd.exe changeappvolume /%ActivePID% -1 ,,Hide   
                     }
                     IfWinExist, ahk_exe TIDAL.exe
                     {
-                    txtFile := "VolumePercents/TidalPercents.txt"
+                    txtFile := fixedDocPath . "/AHKPercentHolds/TidalPercents.txt"
                     WinGet, ActivePID, PID, ahk_exe TIDAL.exe
                     Runwait, cmd.exe /c SoundVolumeView.exe /stab "" | GetNir "Volume Percent" "ProcessID= %ActivePID%" > %txtFile% ,,Hide 
                     FileReadLine, PercentVal, %txtFile%, 1
                     StringTrimRight, trimmedPercentVal, PercentVal, 1
                     decimalPercent := trimmedPercentVal /100
-                    FileAppend, %ActivePID%\%decimalPercent%`n, VolumePercents/MediaHold.txt 
+                    FileAppend, %ActivePID%\%decimalPercent%`n, %MediaHoldFilePath% 
                     Run cmd.exe /c start nircmd.exe changeappvolume /%ActivePID% -1 ,,Hide  
                     }
                     IfWinExist, ahk_exe Spotify.exe
                     {
-                    txtFile := "VolumePercents/SpotifyPercents.txt"
+                    txtFile := fixedDocPath . "/AHKPercentHolds/SpotifyPercents.txt"
                     WinGet, ActivePID, PID, ahk_exe Spotify.exe
                     Runwait, cmd.exe /c SoundVolumeView.exe /stab "" | GetNir "Volume Percent" "ProcessID= %ActivePID%" > %txtFile% ,,Hide 
                     FileReadLine, PercentVal, %txtFile%, 1
                     StringTrimRight, trimmedPercentVal, PercentVal, 1
                     decimalPercent := trimmedPercentVal /100
-                    FileAppend, %ActivePID%\%decimalPercent%`n, VolumePercents/MediaHold.txt
+                    FileAppend, %ActivePID%\%decimalPercent%`n, %MediaHoldFilePath%
                     Run cmd.exe /c start nircmd.exe changeappvolume /%ActivePID% -1 ,,Hide   
                     }
                     IfWinExist, Pocket Casts
                     {
-                    txtFile := "VolumePercents/PocketCastsPercents.txt"
+                    txtFile := fixedDocPath . "/AHKPercentHolds/PocketCastsPercents.txt"
                     WinGet, ActivePID, PID, Pocket Casts
                     Runwait, cmd.exe /c SoundVolumeView.exe /stab "" | GetNir "Volume Percent" "ProcessID= %ActivePID%" > %txtFile% ,,Hide 
                     FileReadLine, PercentVal, %txtFile%, 1
                     StringTrimRight, trimmedPercentVal, PercentVal, 1
                     decimalPercent := trimmedPercentVal /100
-                    FileAppend, %ActivePID%\%decimalPercent%`n, VolumePercents/MediaHold.txt
+                    FileAppend, %ActivePID%\%decimalPercent%`n, %MediaHoldFilePath%
                     Run cmd.exe /c start nircmd.exe changeappvolume "Pocket Casts.exe" -1 ,,Hide   
                     }
                     IfWinExist, VLC media player
                     {
-                    txtFile := "VolumePercents/VLCPercents.txt"
+                    txtFile := fixedDocPath . "/AHKPercentHolds/VLCPercents.txt"
                     WinGet, ActivePID, PID, VLC media player
                     Runwait, cmd.exe /c SoundVolumeView.exe /stab "" | GetNir "Volume Percent" "ProcessID= %ActivePID%" > %txtFile% ,,Hide 
                     FileReadLine, PercentVal, %txtFile%, 1
                     StringTrimRight, trimmedPercentVal, PercentVal, 1
                     decimalPercent := trimmedPercentVal /100
-                    FileAppend, %ActivePID%\%decimalPercent%`n, VolumePercents/MediaHold.txt
+                    FileAppend, %ActivePID%\%decimalPercent%`n, %MediaHoldFilePath%
                     Run cmd.exe /c start nircmd.exe changeappvolume /%ActivePID% -1 ,,Hide   
                     } 
                     return    
             ;Unmute/Restore Media volume
                 mediaVolUnmuteLab:
-                    Loop, Read, VolumePercents/MediaHold.txt
+                    MediaHoldFilePath := fixedDocPath . "/AHKPercentHolds/MediaHold.txt"                
+                    Loop, Read, %MediaHoldFilePath%
                     {
                         StringSplit, HoldArr, A_LoopReadLine, \
                         WinGetTitle, currTitle, ahk_pid %HoldArr1%
@@ -1010,7 +910,7 @@ lineInMuteHold := 0
                     return
             ;Mute Line In volume
                 lineVolMuteLab:
-                    txtFile := "VolumePercents/LineInPercent.txt"
+                    txtFile := fixedDocPath . "/AHKPercentHolds/LineInPercent.txt"
                     Runwait, cmd.exe /c SoundVolumeView.exe /stab "" | GetNir "Volume Percent" "ProcessID= %LineInPID%" > %txtFile% ,,Hide 
                     FileReadLine, PercentVal, %txtFile%, 1
                     StringTrimRight, trimmedPercentVal, PercentVal, 1
@@ -1473,3 +1373,44 @@ lineInMuteHold := 0
                 Run cmd.exe /c start nircmd.exe setdefaultsounddevice "K5 Pro" 2 ,,Hide
                 Send, {ShiftDown}{AltDown}{CtrlDown}{Numpad3}{CtrlUp}{AltUp}{ShiftUp}
                 return  
+    ;Kasa lighting
+        ;Main room Light bulb on/off + brightness
+            ;Turn off bulb
+                lampOffLab:
+                Runwait cmd.exe /c kasa --bulb --alias Coltons_Lamp off ,,Hide 
+                MsgBox,, Lamp Notice, Turning lamp off, 1
+                return
+            ;Turn on/brightness 1%
+                lamp1Lab:
+                Runwait cmd.exe /c kasa --bulb --alias Coltons_Lamp brightness 1 ,,Hide
+                lampBrightVal := 1
+                MsgBox,, Lamp Notice, Setting lamp to 1 percent brightness, 1            
+                return
+            ;Turn on/brightness down 10%
+                lampBrightDownLab:
+                lampBrightVal := lampBrightVal - 10
+                If (lampBrightVal <= 1)
+                {
+                    lampBrightVal := 1
+                    MsgBox,, Lamp Notice, lamp brightness bottomed out , 1
+                    return 
+                }
+                Runwait cmd.exe /c kasa --bulb --alias Coltons_Lamp brightness %lampBrightVal% ,,Hide
+                MsgBox,, Lamp Notice, Decreasing lamp brightness to %lampBrightVal% , 1 
+                return
+            ;Turn on/brightness up 10%
+                lampBrightUpLab:
+                lampBrightVal := lampBrightVal + 10
+                If (lampBrightVal >= 100)
+                {
+                    lampBrightVal := 100
+                    MsgBox,, Lamp Notice, lamp brightness maxed out , 1
+                    return 
+                }
+                Runwait cmd.exe /c kasa --bulb --alias Coltons_Lamp brightness %lampBrightVal% ,,Hide
+                MsgBox,, Lamp Notice, Increasing lamp brightness to %lampBrightVal% , 1 
+                return
+            ;Lamp Gui
+                lampGUILab:
+                Runwait, LampGUI.ahk
+                return
