@@ -110,7 +110,7 @@
         }
         IfWinNotExist, %titleTag% ahk_class %appClass%
         {   
-            RunWait, "C:\Users\" . A_UserName . "\AppData\Local\TIDAL\TIDAL.exe",,,runPID
+            RunWait, %exePath%,,,runPID
             WinActivate, ahk_pid runPID 
             Sleep, 1000
             Return
@@ -319,7 +319,6 @@
         {       
             IfWinActive, %titleTag% ahk_class %appClass%
             {
-                Send, {Media_Play_Pause}
                 return                  
             }
             Else 

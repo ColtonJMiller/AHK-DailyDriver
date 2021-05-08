@@ -117,15 +117,14 @@
             Send, {CtrlDown}{F4}{CtrlUp}
             Return
         }
-        If (this_title ~= "Vivaldi")
+        If (this_class = "Chrome_WidgetWin_1")
         {
-            KeyWait, Shift
-            Send, {CtrlDown}{AltDown}{ShiftDown}5{ShiftUp}{AltUp}{CtrlUp}
-            Return
+            If (this_title ~= "Vivaldi")
+            {
+                Send, {CtrlDown}{AltDown}{ShiftDown}5{ShiftUp}{AltUp}{CtrlUp}
+                Return
+            }
         }
-        Else
-        {
-            WinClose, A
-            Return
-        }
+        WinClose, A
+        Return
     }

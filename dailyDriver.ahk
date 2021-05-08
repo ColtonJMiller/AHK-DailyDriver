@@ -19,6 +19,7 @@ SetTitleMatchMode, 2
 #Include, Functions/OneTimeHotKeyFunctions.ahk
 #Include, Functions/ApplicationPosFunctions.ahk
 #Include, Functions/ApplicationLaunchFunctions.ahk
+#Include, Functions/VolumeControlFunctions.ahk
 
 ;Global variables
     StringReplace, fixedDocPath, A_MyDocuments, \, /, All]
@@ -117,28 +118,6 @@ SetTitleMatchMode, 2
             ;ffNewTabAltHK := ">+>^F20"
             ;hotkey, %ffNewTabAltHK%, ffNewTabAltLab
     ;HOTKEYS Volume controls
-        ;Mute Channels
-            ;Mute Focused volume
-                focusVolMuteHK := "<!F13"
-                hotkey, %focusVolMuteHK%, focusVolMuteLab
-            ;Unmute/Restore Focused volume
-                focusVolUnmuteHK := "<!F14"
-                hotkey, %focusVolUnmuteHK%, focusVolUnmuteLab
-            ;Mute Media volume
-                mediaVolMuteHK := "<!F15"
-                hotkey, %mediaVolMuteHK%, mediaVolMuteLab
-            ;Unmute/Restore Media volume
-                mediaVolUnmuteHK := "<!F16"
-                hotkey, %mediaVolUnmuteHK%, mediaVolUnmuteLab
-            ;Mute Line In volume
-                lineVolMuteHK := "<!F17"
-                hotkey, %lineVolMuteHK%, lineVolMuteLab
-            ;Unmute/Restore Line In volume
-                lineVolUnmuteHK := "<!F18"
-                hotkey, %lineVolUnmuteHK%, lineVolUnmuteLab
-            ;Mute/Unmute System volume 
-                sysVolMuteHK := "<!F19"
-                hotkey, %sysVolMuteHK%, sysVolMuteLab
         ;focused application volumes
             ;focused application volume down 2%
                 focusVolDown2HK := "F13"
@@ -203,12 +182,12 @@ SetTitleMatchMode, 2
             ;main system volume up 2%
                 mainSysVolUp2HK := "F20"
                 hotkey, %mainSysVolUp2HK%, mainSysVolUp2Lab
-            ;main system volume down 5%
-                mainSysVolDown5HK := ">+F19"
-                hotkey, %mainSysVolDown5HK%, mainSysVolDown5Lab
-            ;main system volume up 5%
-                mainSysVolUp5HK := ">+F20"
-                hotkey, %mainSysVolUp5HK%, mainSysVolUp5Lab
+            ;main system volume down 4%
+                mainSysVolDown4HK := ">+F19"
+                hotkey, %mainSysVolDown4HK%, mainSysVolDown4Lab
+            ;main system volume up 4%
+                mainSysVolUp4HK := ">+F20"
+                hotkey, %mainSysVolUp4HK%, mainSysVolUp4Lab
             ;main system volume down 10%
                 mainSysVolDown10HK := ">!F19"
                 hotkey, %mainSysVolDown10HK%, mainSysVolDown10Lab        
@@ -361,676 +340,105 @@ SetTitleMatchMode, 2
                 TwitchLaunchActive()
                 Return
     ;Volume Controls
-        ;Mute channels    
-            ;Mute Focused volume
-                focusVolMuteLab: 
-                    return     
-            ;Unmute/Restore Focused volume
-                focusVolUnmuteLab:
-                    return                  
-            ;Mute Media volume
-                mediaVolMuteLab:
-                    return    
-            ;Unmute/Restore Media volume
-                mediaVolUnmuteLab:
-                    return
-            ;Mute Line In volume
-                lineVolMuteLab:               
-                    return     
-            ;Unmute/Restore Line In volume
-                lineVolUnmuteLab:
-                    return            
-            ;Mute/Unmute System volume
-                sysVolMuteLab:
-                    Send, {Volume_Mute}
-                    return
         ;focused application volumes
             ;focused application volume down 2%
                 focusVolDown2Lab:
-                    SoundGet, currVol
-                    percentCurrVol := currVol / 100
-                    percentRecalcAdd := "+" . (0.02 / percentCurrVol)                    
-                    percentRecalcSubt := "-" . (0.02 / percentCurrVol)
-                    currentAHKID := WinExist("A")
-                    WinGetTitle, focusedTitle, ahk_id %currentAHKID%
-                    WinGetClass, focusedClass, ahk_id %currentAHKID%
-                    ;Chromium exceptions
-                    If (focusedClass = "Chrome_WidgetWin_1")
-                    {
-                        ;Vivaldi
-                        If (focusedTitle ~= "Vivaldi")
-                        {
-                            Run cmd.exe /c start nircmd.exe changeappvolume vivaldi.exe %percentRecalcSubt% ,,Hide
-                        }
-                        ;Twitch App
-                        If (focusedTitle ~= "Twitch")
-                        {
-                            Run cmd.exe /c start nircmd.exe changeappvolume TwitchUI.exe %percentRecalcSubt% ,,Hide
-                        }
-                        ;Chrome
-                        If (focusedTitle ~= "Google Chrome")
-                        {
-                            Run cmd.exe /c start nircmd.exe changeappvolume chrome.exe %percentRecalcSubt% ,,Hide
-                        }
-                    }
-                    Else
-                    {
-                        Run cmd.exe /c start nircmd.exe changeappvolume focused %percentRecalcSubt% ,,Hide
-                    }
-                    return
+                    focusVol(2,"-")
+                    Return
             ;focused application volume up 2%        
                 focusVolUp2Lab:
-                    SoundGet, currVol
-                    percentCurrVol := currVol / 100
-                    percentRecalcAdd := "+" . (0.02 / percentCurrVol)                    
-                    percentRecalcSubt := "-" . (0.02 / percentCurrVol)
-                    currentAHKID := WinExist("A")
-                    WinGetTitle, focusedTitle, ahk_id %currentAHKID%
-                    WinGetClass, focusedClass, ahk_id %currentAHKID%
-                    ;Chromium exceptions
-                    If (focusedClass = "Chrome_WidgetWin_1")
-                    {
-                        ;Vivaldi
-                        If (focusedTitle ~= "Vivaldi")
-                        {
-                            Run cmd.exe /c start nircmd.exe changeappvolume vivaldi.exe %percentRecalcAdd% ,,Hide
-                        }
-                        ;Twitch App
-                        If (focusedTitle ~= "Twitch")
-                        {
-                            Run cmd.exe /c start nircmd.exe changeappvolume TwitchUI.exe %percentRecalcAdd% ,,Hide
-                        }
-                        ;Chrome
-                        If (focusedTitle ~= "Google Chrome")
-                        {
-                            Run cmd.exe /c start nircmd.exe changeappvolume chrome.exe %percentRecalcAdd% ,,Hide
-                        }
-                    }
-                    Else
-                    {
-                        Run cmd.exe /c start nircmd.exe changeappvolume focused %percentRecalcAdd% ,,Hide
-                    }
+                    focusVol(2,"+")
                     Return
             ;focused application volume down 5%
                 focusVolDown5Lab:
-                    SoundGet, currVol
-                    percentCurrVol := currVol / 100
-                    percentRecalcAdd := "+" . (0.05 / percentCurrVol)                    
-                    percentRecalcSubt := "-" . (0.05 / percentCurrVol)
-                    currentAHKID := WinExist("A")
-                    WinGetTitle, focusedTitle, ahk_id %currentAHKID%
-                    WinGetClass, focusedClass, ahk_id %currentAHKID%
-                    ;Chromium exceptions
-                    If (focusedClass = "Chrome_WidgetWin_1")
-                    {
-                        ;Vivaldi
-                        If (focusedTitle ~= "Vivaldi")
-                        {
-                            Run cmd.exe /c start nircmd.exe changeappvolume vivaldi.exe %percentRecalcSubt% ,,Hide
-                        }
-                        ;Twitch App
-                        If (focusedTitle ~= "Twitch")
-                        {
-                            Run cmd.exe /c start nircmd.exe changeappvolume TwitchUI.exe %percentRecalcSubt% ,,Hide
-                        }
-                        ;Chrome
-                        If (focusedTitle ~= "Google Chrome")
-                        {
-                            Run cmd.exe /c start nircmd.exe changeappvolume chrome.exe %percentRecalcSubt% ,,Hide
-                        }
-                    }
-                    Else
-                    {
-                        Run cmd.exe /c start nircmd.exe changeappvolume focused %percentRecalcSubt% ,,Hide
-                    }
+                    focusVol(5,"-")
                     Return
             ;focused application volume up 5%
                 focusVolUp5Lab:
-                    SoundGet, currVol
-                    percentCurrVol := currVol / 100
-                    percentRecalcAdd := "+" . (0.05 / percentCurrVol)                    
-                    percentRecalcSubt := "-" . (0.05 / percentCurrVol)
-                    currentAHKID := WinExist("A")
-                    WinGetTitle, focusedTitle, ahk_id %currentAHKID%
-                    WinGetClass, focusedClass, ahk_id %currentAHKID%
-                    ;Chromium exceptions
-                    If (focusedClass = "Chrome_WidgetWin_1")
-                    {
-                        ;Vivaldi
-                        If (focusedTitle ~= "Vivaldi")
-                        {
-                            Run cmd.exe /c start nircmd.exe changeappvolume vivaldi.exe %percentRecalcAdd% ,,Hide
-                        }
-                        ;Twitch App
-                        If (focusedTitle ~= "Twitch")
-                        {
-                            Run cmd.exe /c start nircmd.exe changeappvolume TwitchUI.exe %percentRecalcAdd% ,,Hide
-                        }
-                        ;Chrome
-                        If (focusedTitle ~= "Google Chrome")
-                        {
-                            Run cmd.exe /c start nircmd.exe changeappvolume chrome.exe %percentRecalcAdd% ,,Hide
-                        }
-                    }
-                    Else
-                    {
-                        Run cmd.exe /c start nircmd.exe changeappvolume focused %percentRecalcAdd% ,,Hide
-                    }
+                    focusVol(5,"+")
                     Return
             ;focused application volume down 10%
                 focusVolDown10Lab:
-                    SoundGet, currVol
-                    percentCurrVol := currVol / 100
-                    percentRecalcAdd := "+" . (0.1 / percentCurrVol)                    
-                    percentRecalcSubt := "-" . (0.1 / percentCurrVol)
-                    currentAHKID := WinExist("A")
-                    WinGetTitle, focusedTitle, ahk_id %currentAHKID%
-                    WinGetClass, focusedClass, ahk_id %currentAHKID%
-                    ;Chromium exceptions
-                    If (focusedClass = "Chrome_WidgetWin_1")
-                    {
-                        ;Vivaldi
-                        If (focusedTitle ~= "Vivaldi")
-                        {
-                            Run cmd.exe /c start nircmd.exe changeappvolume vivaldi.exe %percentRecalcSubt% ,,Hide
-                        }
-                        ;Twitch App
-                        If (focusedTitle ~= "Twitch")
-                        {
-                            Run cmd.exe /c start nircmd.exe changeappvolume TwitchUI.exe %percentRecalcSubt% ,,Hide
-                        }
-                        ;Chrome
-                        If (focusedTitle ~= "Google Chrome")
-                        {
-                            Run cmd.exe /c start nircmd.exe changeappvolume chrome.exe %percentRecalcSubt% ,,Hide
-                        }
-                    }
-                    Else
-                    {
-                        Run cmd.exe /c start nircmd.exe changeappvolume focused %percentRecalcSubt% ,,Hide
-                    }
+                    focusVol(10,"-")
                     Return
             ;focused application volume up 10%
                 focusVolUp10Lab:
-                    SoundGet, currVol
-                    percentCurrVol := currVol / 100
-                    percentRecalcAdd := "+" . (0.1 / percentCurrVol)                    
-                    percentRecalcSubt := "-" . (0.1 / percentCurrVol)
-                    currentAHKID := WinExist("A")
-                    WinGetTitle, focusedTitle, ahk_id %currentAHKID%
-                    WinGetClass, focusedClass, ahk_id %currentAHKID%
-                    ;Chromium exceptions
-                    If (focusedClass = "Chrome_WidgetWin_1")
-                    {
-                        ;Vivaldi
-                        If (focusedTitle ~= "Vivaldi")
-                        {
-                            Run cmd.exe /c start nircmd.exe changeappvolume vivaldi.exe %percentRecalcAdd% ,,Hide
-                        }
-                        ;Twitch App
-                        If (focusedTitle ~= "Twitch")
-                        {
-                            Run cmd.exe /c start nircmd.exe changeappvolume TwitchUI.exe %percentRecalcAdd% ,,Hide
-                        }
-                        ;Chrome
-                        If (focusedTitle ~= "Google Chrome")
-                        {
-                            Run cmd.exe /c start nircmd.exe changeappvolume chrome.exe %percentRecalcAdd% ,,Hide
-                        }
-                    }
-                    Else
-                    {
-                        Run cmd.exe /c start nircmd.exe changeappvolume focused %percentRecalcAdd% ,,Hide
-                    }
+                    focusVol(10,"+")
                     Return
         ;Media volumes
-            ;Media volume control (firefox,chrome,tidal,and spotify) down 2%
+            ;Media volume control down 2%
                 mediaVolDown2Lab:
-                    SoundGet, currVol
-                    percentCurrVol := currVol / 100
-                    percentRecalcAdd := "+" . (0.02 / percentCurrVol)                    
-                    percentRecalcSubt := "-" . (0.02 / percentCurrVol) 
-                    currentAHKID := WinExist("A")       
-                    ;Check for active Firefox
-                    IfWinExist, ahk_class MozillaWindowClass
-                    {
-                        winPIDArr := []
-                        WinGet, fireFoxWindows, List, ahk_class MozillaWindowClass
-                        Loop,%fireFoxWindows%
-                        {
-                            hold := fireFoxWindows%A_Index%
-                            WinGet, ffPID, PID, ahk_id %hold%
-                            winPIDArr.push(ffPID)
-                        }
-                        uniqueWins := uniq(winPIDArr)
-                        For k, v in uniqueWins
-                        {
-                           Run cmd.exe /c start nircmd.exe changeappvolume /%v% %percentRecalcSubt% ,,Hide 
-                        }
-                    }
-                    ;Chromium exceptions
-                    IfWinExist, ahk_class Chrome_WidgetWin_1
-                    {
-                        ;Vivaldi
-                        IfWinExist, Vivaldi
-                        {
-                            Run cmd.exe /c start nircmd.exe changeappvolume vivaldi.exe %percentRecalcSubt% ,,Hide
-                        }
-                        ;Twitch App
-                        IfWinExist, Twitch
-                        {
-                            Run cmd.exe /c start nircmd.exe changeappvolume TwitchUI.exe %percentRecalcSubt% ,,Hide
-                        }
-                        ;Chrome
-                        IfWinExist, Google Chrome
-                        {
-                            Run cmd.exe /c start nircmd.exe changeappvolume chrome.exe %percentRecalcSubt% ,,Hide
-                        }
-                    }
-                    IfWinExist, ahk_exe TIDAL.exe
-                    {
-                        Run cmd.exe /c start nircmd.exe changeappvolume TIDAL.exe %percentRecalcSubt% ,,Hide               
-                        Run cmd.exe /c start nircmd.exe changeappvolume TIDALPlayer.exe %percentRecalcSubt% ,,Hide         
-                    }
-                    IfWinExist, ahk_exe Spotify.exe
-                    {
-                        Run cmd.exe /c start nircmd.exe changeappvolume Spotify.exe %percentRecalcSubt% ,,Hide            
-                    }
-                    IfWinExist, Pocket Casts
-                    {
-                        Run cmd.exe /c start nircmd.exe changeappvolume "Pocket Casts.exe" %percentRecalcSubt% ,,Hide                         
-                    } 
-                    IfWinExist, VLC media player 
-                    {
-                        Run cmd.exe /c start nircmd.exe changeappvolume vlc.exe %percentRecalcSubt% ,,Hide                        
-                    }
+                    MediaVol(2,"-")
                     Return
             ;Media volume control (firefox,chrome,tidal,and spotify) up 2%
                 mediaVolUp2Lab:
-                    SoundGet, currVol
-                    percentCurrVol := currVol / 100
-                    percentRecalcAdd := "+" . (0.02 / percentCurrVol)                    
-                    percentRecalcSubt := "-" . (0.02 / percentCurrVol) 
-                    currentAHKID := WinExist("A")       
-                    ;Check for active Firefox
-                    IfWinExist, ahk_class MozillaWindowClass
-                    {
-                        winPIDArr := []
-                        WinGet, fireFoxWindows, List, ahk_class MozillaWindowClass
-                        Loop,%fireFoxWindows%
-                        {
-                            hold := fireFoxWindows%A_Index%
-                            WinGet, ffPID, PID, ahk_id %hold%
-                            winPIDArr.push(ffPID)
-                        }
-                        uniqueWins := uniq(winPIDArr)
-                        For k, v in uniqueWins
-                        {
-                           Run cmd.exe /c start nircmd.exe changeappvolume /%v% %percentRecalcAdd% ,,Hide 
-                        }
-                    }
-                    ;Chromium exceptions
-                    IfWinExist, ahk_class Chrome_WidgetWin_1
-                    {
-                        ;Vivaldi
-                        IfWinExist, Vivaldi
-                        {
-                            Run cmd.exe /c start nircmd.exe changeappvolume vivaldi.exe %percentRecalcAdd% ,,Hide
-                        }
-                        ;Twitch App
-                        IfWinExist, Twitch
-                        {
-                            Run cmd.exe /c start nircmd.exe changeappvolume TwitchUI.exe %percentRecalcAdd% ,,Hide
-                        }
-                        ;Chrome
-                        IfWinExist, Google Chrome
-                        {
-                            Run cmd.exe /c start nircmd.exe changeappvolume chrome.exe %percentRecalcAdd% ,,Hide
-                        }
-                    }
-                    IfWinExist, ahk_exe TIDAL.exe
-                    {
-                        Run cmd.exe /c start nircmd.exe changeappvolume TIDAL.exe %percentRecalcAdd% ,,Hide               
-                        Run cmd.exe /c start nircmd.exe changeappvolume TIDALPlayer.exe %percentRecalcAdd% ,,Hide         
-                    }
-                    IfWinExist, ahk_exe Spotify.exe
-                    {
-                        Run cmd.exe /c start nircmd.exe changeappvolume Spotify.exe %percentRecalcAdd% ,,Hide            
-                    }
-                    IfWinExist, Pocket Casts
-                    {
-                        Run cmd.exe /c start nircmd.exe changeappvolume "Pocket Casts.exe" %percentRecalcAdd% ,,Hide                         
-                    } 
-                    IfWinExist, VLC media player 
-                    {
-                        Run cmd.exe /c start nircmd.exe changeappvolume vlc.exe %percentRecalcAdd% ,,Hide                        
-                    }
+                    MediaVol(2,"+")
                     Return
             ;Media volume control (firefox,chrome,tidal,and spotify) down 5%
                 mediaVolDown5Lab:
-                    SoundGet, currVol
-                    percentCurrVol := currVol / 100
-                    percentRecalcAdd := "+" . (0.05 / percentCurrVol)                    
-                    percentRecalcSubt := "-" . (0.05 / percentCurrVol) 
-                    currentAHKID := WinExist("A")       
-                    ;Check for active Firefox
-                    IfWinExist, ahk_class MozillaWindowClass
-                    {
-                        winPIDArr := []
-                        WinGet, fireFoxWindows, List, ahk_class MozillaWindowClass
-                        Loop,%fireFoxWindows%
-                        {
-                            hold := fireFoxWindows%A_Index%
-                            WinGet, ffPID, PID, ahk_id %hold%
-                            winPIDArr.push(ffPID)
-                        }
-                        uniqueWins := uniq(winPIDArr)
-                        For k, v in uniqueWins
-                        {
-                           Run cmd.exe /c start nircmd.exe changeappvolume /%v% %percentRecalcSubt% ,,Hide 
-                        }
-                    }
-                    ;Chromium exceptions
-                    IfWinExist, ahk_class Chrome_WidgetWin_1
-                    {
-                        ;Vivaldi
-                        IfWinExist, Vivaldi
-                        {
-                            Run cmd.exe /c start nircmd.exe changeappvolume vivaldi.exe %percentRecalcSubt% ,,Hide
-                        }
-                        ;Twitch App
-                        IfWinExist, Twitch
-                        {
-                            Run cmd.exe /c start nircmd.exe changeappvolume TwitchUI.exe %percentRecalcSubt% ,,Hide
-                        }
-                        ;Chrome
-                        IfWinExist, Google Chrome
-                        {
-                            Run cmd.exe /c start nircmd.exe changeappvolume chrome.exe %percentRecalcSubt% ,,Hide
-                        }
-                    }
-                    IfWinExist, ahk_exe TIDAL.exe
-                    {
-                        Run cmd.exe /c start nircmd.exe changeappvolume TIDAL.exe %percentRecalcSubt% ,,Hide               
-                        Run cmd.exe /c start nircmd.exe changeappvolume TIDALPlayer.exe %percentRecalcSubt% ,,Hide         
-                    }
-                    IfWinExist, ahk_exe Spotify.exe
-                    {
-                        Run cmd.exe /c start nircmd.exe changeappvolume Spotify.exe %percentRecalcSubt% ,,Hide            
-                    }
-                    IfWinExist, Pocket Casts
-                    {
-                        Run cmd.exe /c start nircmd.exe changeappvolume "Pocket Casts.exe" %percentRecalcSubt% ,,Hide                         
-                    } 
-                    IfWinExist, VLC media player 
-                    {
-                        Run cmd.exe /c start nircmd.exe changeappvolume vlc.exe %percentRecalcSubt% ,,Hide                        
-                    }
+                    MediaVol(5,"-")
                     Return
             ;Media volume control (firefox,chrome,tidal,and spotify) up 5%
                 mediaVolUp5Lab:
-                    SoundGet, currVol
-                    percentCurrVol := currVol / 100
-                    percentRecalcAdd := "+" . (0.05 / percentCurrVol)                    
-                    percentRecalcSubt := "-" . (0.05 / percentCurrVol) 
-                    currentAHKID := WinExist("A")       
-                    ;Check for active Firefox
-                    IfWinExist, ahk_class MozillaWindowClass
-                    {
-                        winPIDArr := []
-                        WinGet, fireFoxWindows, List, ahk_class MozillaWindowClass
-                        Loop,%fireFoxWindows%
-                        {
-                            hold := fireFoxWindows%A_Index%
-                            WinGet, ffPID, PID, ahk_id %hold%
-                            winPIDArr.push(ffPID)
-                        }
-                        uniqueWins := uniq(winPIDArr)
-                        For k, v in uniqueWins
-                        {
-                           Run cmd.exe /c start nircmd.exe changeappvolume /%v% %percentRecalcAdd% ,,Hide 
-                        }
-                    }
-                    ;Chromium exceptions
-                    IfWinExist, ahk_class Chrome_WidgetWin_1
-                    {
-                        ;Vivaldi
-                        IfWinExist, Vivaldi
-                        {
-                            Run cmd.exe /c start nircmd.exe changeappvolume vivaldi.exe %percentRecalcAdd% ,,Hide
-                        }
-                        ;Twitch App
-                        IfWinExist, Twitch
-                        {
-                            Run cmd.exe /c start nircmd.exe changeappvolume TwitchUI.exe %percentRecalcAdd% ,,Hide
-                        }
-                        ;Chrome
-                        IfWinExist, Google Chrome
-                        {
-                            Run cmd.exe /c start nircmd.exe changeappvolume chrome.exe %percentRecalcAdd% ,,Hide
-                        }
-                    }
-                    IfWinExist, ahk_exe TIDAL.exe
-                    {
-                        Run cmd.exe /c start nircmd.exe changeappvolume TIDAL.exe %percentRecalcAdd% ,,Hide               
-                        Run cmd.exe /c start nircmd.exe changeappvolume TIDALPlayer.exe %percentRecalcAdd% ,,Hide         
-                    }
-                    IfWinExist, ahk_exe Spotify.exe
-                    {
-                        Run cmd.exe /c start nircmd.exe changeappvolume Spotify.exe %percentRecalcAdd% ,,Hide            
-                    }
-                    IfWinExist, Pocket Casts
-                    {
-                        Run cmd.exe /c start nircmd.exe changeappvolume "Pocket Casts.exe" %percentRecalcAdd% ,,Hide                         
-                    } 
-                    IfWinExist, VLC media player 
-                    {
-                        Run cmd.exe /c start nircmd.exe changeappvolume vlc.exe %percentRecalcAdd% ,,Hide                        
-                    }
+                    MediaVol(5,"+")
                     Return
             ;Media volume control (firefox,chrome,tidal,and spotify) down 10%
                 mediaVolDown10Lab:
-                    SoundGet, currVol
-                    percentCurrVol := currVol / 100
-                    percentRecalcAdd := "+" . (0.1 / percentCurrVol)                    
-                    percentRecalcSubt := "-" . (0.1 / percentCurrVol) 
-                    currentAHKID := WinExist("A")       
-                    ;Check for active Firefox
-                    IfWinExist, ahk_class MozillaWindowClass
-                    {
-                        winPIDArr := []
-                        WinGet, fireFoxWindows, List, ahk_class MozillaWindowClass
-                        Loop,%fireFoxWindows%
-                        {
-                            hold := fireFoxWindows%A_Index%
-                            WinGet, ffPID, PID, ahk_id %hold%
-                            winPIDArr.push(ffPID)
-                        }
-                        uniqueWins := uniq(winPIDArr)
-                        For k, v in uniqueWins
-                        {
-                           Run cmd.exe /c start nircmd.exe changeappvolume /%v% %percentRecalcSubt% ,,Hide 
-                        }
-                    }
-                    ;Chromium exceptions
-                    IfWinExist, ahk_class Chrome_WidgetWin_1
-                    {
-                        ;Vivaldi
-                        IfWinExist, Vivaldi
-                        {
-                            Run cmd.exe /c start nircmd.exe changeappvolume vivaldi.exe %percentRecalcSubt% ,,Hide
-                        }
-                        ;Twitch App
-                        IfWinExist, Twitch
-                        {
-                            Run cmd.exe /c start nircmd.exe changeappvolume TwitchUI.exe %percentRecalcSubt% ,,Hide
-                        }
-                        ;Chrome
-                        IfWinExist, Google Chrome
-                        {
-                            Run cmd.exe /c start nircmd.exe changeappvolume chrome.exe %percentRecalcSubt% ,,Hide
-                        }
-                    }
-                    IfWinExist, ahk_exe TIDAL.exe
-                    {
-                        Run cmd.exe /c start nircmd.exe changeappvolume TIDAL.exe %percentRecalcSubt% ,,Hide               
-                        Run cmd.exe /c start nircmd.exe changeappvolume TIDALPlayer.exe %percentRecalcSubt% ,,Hide         
-                    }
-                    IfWinExist, ahk_exe Spotify.exe
-                    {
-                        Run cmd.exe /c start nircmd.exe changeappvolume Spotify.exe %percentRecalcSubt% ,,Hide            
-                    }
-                    IfWinExist, Pocket Casts
-                    {
-                        Run cmd.exe /c start nircmd.exe changeappvolume "Pocket Casts.exe" %percentRecalcSubt% ,,Hide                         
-                    } 
-                    IfWinExist, VLC media player 
-                    {
-                        Run cmd.exe /c start nircmd.exe changeappvolume vlc.exe %percentRecalcSubt% ,,Hide                        
-                    }
+                    MediaVol(10,"-")
                     Return
             ;Media volume control (firefox,chrome,tidal,and spotify) up 10%
                 mediaVolUp10Lab:
-                    SoundGet, currVol
-                    percentCurrVol := currVol / 100
-                    percentRecalcAdd := "+" . (0.1 / percentCurrVol)                    
-                    percentRecalcSubt := "-" . (0.1 / percentCurrVol) 
-                    currentAHKID := WinExist("A")       
-                    ;Check for active Firefox
-                    IfWinExist, ahk_class MozillaWindowClass
-                    {
-                        winPIDArr := []
-                        WinGet, fireFoxWindows, List, ahk_class MozillaWindowClass
-                        Loop,%fireFoxWindows%
-                        {
-                            hold := fireFoxWindows%A_Index%
-                            WinGet, ffPID, PID, ahk_id %hold%
-                            winPIDArr.push(ffPID)
-                        }
-                        uniqueWins := uniq(winPIDArr)
-                        For k, v in uniqueWins
-                        {
-                           Run cmd.exe /c start nircmd.exe changeappvolume /%v% %percentRecalcAdd% ,,Hide 
-                        }
-                    }
-                    ;Chromium exceptions
-                    IfWinExist, ahk_class Chrome_WidgetWin_1
-                    {
-                        ;Vivaldi
-                        IfWinExist, Vivaldi
-                        {
-                            Run cmd.exe /c start nircmd.exe changeappvolume vivaldi.exe %percentRecalcAdd% ,,Hide
-                        }
-                        ;Twitch App
-                        IfWinExist, Twitch
-                        {
-                            Run cmd.exe /c start nircmd.exe changeappvolume TwitchUI.exe %percentRecalcAdd% ,,Hide
-                        }
-                        ;Chrome
-                        IfWinExist, Google Chrome
-                        {
-                            Run cmd.exe /c start nircmd.exe changeappvolume chrome.exe %percentRecalcAdd% ,,Hide
-                        }
-                    }
-                    IfWinExist, ahk_exe TIDAL.exe
-                    {
-                        Run cmd.exe /c start nircmd.exe changeappvolume TIDAL.exe %percentRecalcAdd% ,,Hide               
-                        Run cmd.exe /c start nircmd.exe changeappvolume TIDALPlayer.exe %percentRecalcAdd% ,,Hide         
-                    }
-                    IfWinExist, ahk_exe Spotify.exe
-                    {
-                        Run cmd.exe /c start nircmd.exe changeappvolume Spotify.exe %percentRecalcAdd% ,,Hide            
-                    }
-                    IfWinExist, Pocket Casts
-                    {
-                        Run cmd.exe /c start nircmd.exe changeappvolume "Pocket Casts.exe" %percentRecalcAdd% ,,Hide                         
-                    } 
-                    IfWinExist, VLC media player 
-                    {
-                        Run cmd.exe /c start nircmd.exe changeappvolume vlc.exe %percentRecalcAdd% ,,Hide                        
-                    }
+                    MediaVol(10,"+")
                     Return
         ;Line in volumes
             ;Line in volume control down 2%
                 lineVolDown1Lab:
-                    SoundGet, currVol
-                    percentCurrVol := currVol / 100
-                    percentRecalc := 0.02 / percentCurrVol
-                    Run cmd.exe /c start nircmd.exe changeappvolume /%LineInPID% -%percentRecalc% ,,Hide
-                    LineInTrimmed := Round(LineInTrimmed - 2)
-                    If (LineInTrimmed <= 0)
-                    {
-                        LineInTrimmed := 0
-                    }
-                    OSDGui("Line In","Volume",LineInTrimmed)
-                    Return
+                    LineInVol(LineInPID,2,"-")
+                    Return            
             ;Line in volume control up 2% 
                 lineVolUp1Lab: 
-                    SoundGet, currVol
-                    percentCurrVol := currVol / 100
-                    percentRecalc := 0.02 / percentCurrVol
-                    Run cmd.exe /c start nircmd.exe changeappvolume /%LineInPID% +%percentRecalc% ,,Hide
-                    LineInTrimmed := Round(LineInTrimmed + 2)
-                    SoundGet, currSysVol
-                    If (LineInTrimmed >= currSysVol)
-                    {
-                        LineInTrimmed := round(currSysVol)
-                    }
-                    OSDGui("Line In","Volume",LineInTrimmed)
-                    Return
-                    Return
+                    LineInVol(LineInPID,2,"+")
+                    Return       
             ;Line in volume control down 5%
                 lineVolDown5Lab:  
-                    SoundGet, currVol
-                    percentCurrVol := currVol / 100
-                    percentRecalc := 0.05 / percentCurrVol
-                    Run cmd.exe /c start nircmd.exe changeappvolume /%LineInPID% -%percentRecalc% ,,Hide
-                    Return
+                    LineInVol(LineInPID,5,"-")
+                    Return       
             ;Line in volume control up 5%  
-                lineVolUp5Lab:  
-                    SoundGet, currVol
-                    percentCurrVol := currVol / 100
-                    percentRecalc := 0.05 / percentCurrVol
-                    Run cmd.exe /c start nircmd.exe changeappvolume /%LineInPID% +%percentRecalc% ,,Hide
-                    Return
+                lineVolUp5Lab: 
+                    LineInVol(LineInPID,5,"+")
+                    Return       
             ;Line in volume control down 10%
                 lineVolDown10Lab:  
-                    SoundGet, currVol
-                    percentCurrVol := currVol / 100
-                    percentRecalc := 0.1 / percentCurrVol
-                    Run cmd.exe /c start nircmd.exe changeappvolume /%LineInPID% -%percentRecalc% ,,Hide
-                    Return
+                    LineInVol(LineInPID,10,"-")
+                    Return     
             ;Line in volume control up 10%  
                 lineVolUp10Lab:  
-                    SoundGet, currVol
-                    percentCurrVol := currVol / 100
-                    percentRecalc := 0.1 / percentCurrVol
-                    Run cmd.exe /c start nircmd.exe changeappvolume /%LineInPID% +%percentRecalc% ,,Hide
-                    Return
+                    LineInVol(LineInPID,10,"+")
+                    Return    
         ;main system volumes
             ;main system volume down 2%
                 mainSysVolDown2Lab:
-                    Send, {Volume_Down 1}
+                    MainSysVol(-2)
                     Return
             ;main system volume up 2%
                 mainSysVolUp2Lab:
-                    Send, {Volume_up 1}
-                    Return       
+                    MainSysVol(2)
+                    Return    
             ;main system volume down 4%
-                mainSysVolDown5Lab:
-                    Send, {Volume_Down 2}
+                mainSysVolDown4Lab:
+                    MainSysVol(-4)
                     Return
-            ;main system volume up 5%
-                mainSysVolUp5Lab:
-                    Send, {Volume_up 2}
+            ;main system volume up 4%
+                mainSysVolUp4Lab:
+                    MainSysVol(4)
                     Return
             ;main system volume down 10%
                 mainSysVolDown10Lab:
-                    Send, {Volume_Down 5}
+                    MainSysVol(-10)
                     Return
             ;main system volume up 10%
                 mainSysVolUp10Lab:
-                    Send, {Volume_up 5}
+                    MainSysVol(10)
                     Return
     ;EQ and Sound Output
         ;Switch output with EQ change
