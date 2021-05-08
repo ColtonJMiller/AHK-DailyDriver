@@ -40,21 +40,24 @@ Gui, Submit
     {
         If (BrightnessState)
         {
-            Runwait cmd.exe /c kasa --bulb --alias Coltons_Lamp brightness %BrightnessState% ,,Hide
+            Runwait cmd.exe /c kasa --host 192.168.1.180 --bulb brightness %BrightnessState% ,,Hide
         }  
         If (TemperatureState)   
         {
-            Runwait cmd.exe /c kasa --bulb --alias Coltons_Lamp temperature %TemperatureState% ,,Hide   
+            Runwait cmd.exe /c kasa --host 192.168.1.180 --bulb temperature %TemperatureState% ,,Hide   
         }
         If (!BrightnessState && !TemperatureState)
         {
-            Runwait cmd.exe /c kasa --bulb --alias Coltons_Lamp on ,,Hide             
+            Runwait cmd.exe /c kasa --host 192.168.1.180 --bulb on ,,Hide             
         }   
 
     }
     If (OffState = 1)
     {
-        Runwait cmd.exe /c kasa --bulb --alias Coltons_Lamp off ,,Hide 
+        Runwait cmd.exe /c kasa --host 192.168.1.180 --bulb off ,,Hide 
     }
+Esc::
+ExitApp
+GuiClose:
 ExitApp
 

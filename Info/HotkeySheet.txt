@@ -1,0 +1,32 @@
+KeyBinds|No Modifiers|Right Shift|Left Shift|Right Alt|Left Ctrl|Left Alt|Left Shift + Left Ctrl|Left Shift + Left Alt|Left Ctrl + Left Alt|Shift+Alt+Ctrl
+F13|Focused Volume down 2%|Focused Volume down 5%||Focused Volume down 10%||Mute Focused channel||||
+F14|Focused Volume up 2%|Focused Volume up 5%|Kill process active (FF VS Chrome PS close tab)|Focused Volume up 10%||Unmute (restore previous vol) Focused||||
+F15|Media Volume Down (FireFox chrome spotify tidal) 2%|Media Volume Down (FireFox chrome spotify tidal) 5%||Media Volume Down (FireFox chrome spotify tidal) 10%||Mute Media channels||||
+F16|Media Volume Up (FireFox chrome spotify tidal) 2%|Media Volume Up (FireFox chrome spotify tidal) 5%|Track prev|Media Volume Up (FireFox chrome spotify tidal) 10%||Unmute (restore previous vol) Media||||
+F17|Line in volume down 1%|Line in volume down 5%||Line in volume down 10%||Mute lineIn channel||||
+F18|Line in volume up 1%|Line in volume up 5%|Play/Pause|Line in volume up 10%||Unmute (restore previous vol) lineIn||||
+F19|Master volume down 2%|Master volume down 5%|Track Next|Master volume down 10%||Mute System vol ||||
+F20|Master volume up 2%|Master volume up 5%|Set to Monitor 1 only|Master volume up 5%||Unmute (restore previous vol) System||||
+F21||First Active Window hold||Kasa lamp off||||||
+F22|Restore/Maximize Active window|First Active Window hold clear|Set to Monitor 2 only|Kasa lamp 1%||||||
+F23|Open Volume Mixer/make active|Second Active Window hold||Kasa bright down 2%||||||
+F24|Move active window monitor|Second Active Window hold clear|Set to extended config|Kasa bright up 2%|Restore windows|||||
+|Make Active/Open|||||||||
+M1 (>^F19)|Open / Make Active Firefox Main (changes tab if active)|Open new tab Firefox Main||||Set to BTA30/peace EQ XM4||||
+M2 (>^F20)|Open / Make Active Firefox Alt (changes tab if active)|Open new tab Firefox Alt||||Set to Pro X/peace EQ Pro X||||
+M3 (>^F21)|Open / Make Active Visual Studio (changes tab if active)|||||Set to K5/peace EQ 770 pro||||
+M4 (>^F22)|Open / Make Active Tidal|Open / Make Active Spotify||||Set to K5/peace EQ MK5||||
+M5 (>^F23)|Open/Make active VLC|Open / Make Active Photoshop (changes tab if active)||||||||
+M6 (>^F24)|Open / Make Active Steam Main|Open Steam Alt|Open / Make Active Koolertron Editor|||||||
+|One Time HotKeys|||||||||
+<+<^<!_::|Message box active window and held windows |||||||||
+<+<^!K::|Message box all non hidden windows|||||||||
+<+<^!R::|Reload Script|||||||||
+<+<^<!H::|Open hotkey sheet|||||||||
+<+<^<!G::|Open GUI (Placeholder)|||||||||
+||||||||||
+Shift+Alt+Ctrl|Peace EQ Hotkeys|||||||||
+Num 0|XM4|||||||||
+Num 1|Pro X|||||||||
+Num 2|770 pro|||||||||
+Num 3|MK5|||||||||

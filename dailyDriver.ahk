@@ -1,32 +1,31 @@
 ;Kasa light integration https://github.com/python-kasa/python-kasa
- ;Koolertron 23 key
-;R3 Macros
-;M1 = >^F19 
-;M2 = >^F20 
-;M3 = >^F21 
-;M4 = >^F22 
-;M5 = >^F23 
-;M6 = >^F24 
-;R4 Binds
-;C1 = <+ LT SHIFT
-;C2 = <^ LT CTRL
-;C3 = <! LT ALT
-;C4 = >! RT ALT
-;C5/6 = >+ RT SHIFT
+;Koolertron 23 key Macroset and keys (see L SHIFT + CTRL + ALT + G for full set)
+    ;R3 Macros
+    ;M1 = >^F19 
+    ;M2 = >^F20 
+    ;M3 = >^F21 
+    ;M4 = >^F22 
+    ;M5 = >^F23 
+    ;M6 = >^F24 
+    ;R4 Binds
+    ;C1 = <+ LT SHIFT
+    ;C2 = <^ LT CTRL
+    ;C3 = <! LT ALT
+    ;C4 = >! RT ALT
+    ;C5/6 = >+ RT SHIFT
 
 SetTitleMatchMode, 2
-#Include, Functions.ahk
+#Include, Functions/Functions.ahk
+#Include, Functions/OneTimeHotKeyFunctions.ahk
+#Include, Functions/ApplicationPosFunctions.ahk
+#Include, Functions/ApplicationLaunchFunctions.ahk
 
 ;Global variables
     StringReplace, fixedDocPath, A_MyDocuments, \, /, All]
+    ahkHoldPath := fixedDocPath . "/AHKPercentHolds/"
     LineInPID := grabInputPID()
-    firstActiveHoldCount := 0
-    firstActiveHoldID := ""
-    secondActiveHoldCount := 0
-    secondActiveHoldID := ""
-    FocusMuteHold := 0
-    lineInMuteHold := 0
     lampBrightVal := 1
+    lampOnOffState := 0
 ;HOTKEYS 
     ;HOTKEYS Media Keys 
         ;Track control
@@ -54,7 +53,13 @@ SetTitleMatchMode, 2
             hotkey, %helperGUIHK%, helperGUILab
         ;Active window check 
             activeCheckHK := "<+<^<!_"
-            hotkey, %activeCheckHK%, activeCheckLab               
+            hotkey, %activeCheckHK%, activeCheckLab 
+        ;Kill current active process/close tab
+            killProcessHK:= "<+F14"
+            hotkey, %killProcessHK%, killProcessLab  
+        ;Test Hot Key
+            TestHK := "<^<!<+Q"
+            hotkey, %TestHK%, TestLab            
     ;HOTKEYS Application min, max, and monitor cycle 
         ;Maximize or restore toggle for active window 
             maxToggleHK := "F22"
@@ -71,43 +76,21 @@ SetTitleMatchMode, 2
         ;Move active window to other monitor    
             monitorExtendHK := "<+F24"
             hotkey, %monitorExtendHK%, monitorExtendLab
-        ;Restore windows
-            restoreWinPosHK := "^F24"
-            hotkey, %restoreWinPosHK%, restoreWinPosLab
-    ;HOTKEYS Application process kill
-        ;Kill current active process/close tab
-            killProcessHK:= "<+F14"
-            hotkey, %killProcessHK%, killProcessLab
     ;HOTKEYS Application open and make active. Cycle tabs
-        ;First Active window save / make active
-            firstActiveHoldHK := ">+F21"
-            hotkey, %firstActiveHoldHK%, firstActiveHoldLab
-        ;Second Active window save / make active
-            secondActiveHoldHK := ">+F23"
-            hotkey, %secondActiveHoldHK%, secondActiveHoldLab
-        ;First Active window clear
-            firstActiveClearHK := ">+F22"
-            hotkey, %firstActiveClearHK%, firstActiveClearLab
-        ;Second Active window clear
-            secondActiveClearHK := ">+F24"
-            hotkey, %secondActiveClearHK%, secondActiveClearLab
-        ;Firefox Default Account make active/cycle tabs
-            ffOpenMainHK := ">^F19"
-            hotkey, %ffOpenMainHK%, ffOpenMainLab
-        ;Firefox Alt Account make active/cycle tabs
-            ffOpenAltHK := ">^F20"
-            hotkey, %ffOpenAltHK%, ffOpenAltLab
+        ;Main Browser Account make active/cycle tabs
+            MainBrowserHK := ">^F19"
+            hotkey, %MainBrowserHK%, MainBrowserLab
+        ;Second Browser Account make active/cycle tabs
+            SecondBrowserHK := ">^F20"
+            hotkey, %SecondBrowserHK%, SecondBrowserLab
         ;Visual Studio make active/cycle tabs
             VSCodeOpenHK := ">^F21"
             hotkey, %VSCodeOpenHK%, VSCodeOpenLab
         ;TIDAL make active/open
             tidalOpenHK := ">^F22"
             hotkey, %tidalOpenHK%, tidalOpenLab
-        ;Spotify make active/open
-            spotifyOpenHK := ">+>^F22"
-            hotkey, %spotifyOpenHK%, spotifyOpenLab
         ;Pocket Casts make active/open
-            PCOpenHK := ">!>^F22"
+            PCOpenHK := ">+>^F22"
             hotkey, %PCOpenHK%, PCOpenLab
         ;VLC Player make ative/open
             vlcOpenHK := ">^F23"
@@ -236,16 +219,16 @@ SetTitleMatchMode, 2
     ;HOTKEYS EQ and Sound Output
         ;Switch output with EQ change
             ;Set BTA30 Digital output/Peace EQ XM4
-                DOEQHK := "<!>^F19"
+                DOEQHK := "<+>^F19"
                 hotkey, %DOEQHK%, DOEQLab   
             ;Set Logitech Pro X output/Peace EQ Pro X
-                LPXEQHK := "<!>^F20"
+                LPXEQHK := "<+>^F20"
                 hotkey, %LPXEQHK%, LPXEQLab   
             ;Set FiiO K5 Speaker output/Peace EQ 770 80ohm
-                K5770EQHK := "<!>^F21"
+                K5770EQHK := "<+>^F21"
                 hotkey, %K5770EQHK%, K5770EQLab  
             ;Set FiiO K5 Speaker output/Peace EQ MK5  
-                K5MK5EQHK := "<!>^F22"
+                K5MK5EQHK := "<+>^F22"
                 hotkey, %K5MK5EQHK%, K5MK5EQLab 
     ;HOTKEYS Kasa lighting
         ;Main room Light bulb on/off + brightness
@@ -262,7 +245,7 @@ SetTitleMatchMode, 2
                 lampBrightUpHK := ">!F24"
                 hotkey, %lampBrightUpHK%, lampBrightUpLab  
             ;Lamp Gui
-                lampGUIHK := "<+<^<!F12"
+                lampGUIHK := "<+<^<!W"
                 hotkey, %lampGUIHK%, lampGUILab
         Return
 ;Main code
@@ -283,421 +266,96 @@ SetTitleMatchMode, 2
     ;One time helper keys
         ;Open hotkey sheet
             sheetLab:
-                profile := "-Main-" 
-                profileName := "default-release-1"            
-                IfWinExist, AHK-DailyDriver hotkey mapping
-                {
-                    sheetId := WinExist("AHK-DailyDriver hotkey mapping")
-                    WinActivate, ahk_id %sheetId%
-                }
-                IfWinNotExist, AHK-DailyDriver hotkey mapping
-                {
-                    RunWait, C:\Program Files\Mozilla Firefox\firefox.exe -p %profileName% -new-tab https://docs.google.com/spreadsheets/d/1eRfcNj-UR4kXf5fBXDS4rn95YMSlbbT8McJL3HkK-_A/edit ,,Hide 
-                }    
+                OpenSpreadSheet()
                 Return
         ;Active window check
             activeCheckLab:
-                this_id := WinExist("A")
-                WinGetTitle, this_title, ahk_id %this_id%
-                WinGetClass, this_class, ahk_id %this_id%
-                WinGet, this_PID, PID, ahk_id %this_id%
-                If (firstActiveHoldID = "" && secondActiveHoldID = "")
-                {
-                    MsgBox,Active window info:`n`n Title = %this_title%`n Class = %this_class%`n PID = %this_PID%`n`n Active Hold info:`n`n firstActiveHoldCount = %firstActiveHoldCount%`n firstActiveHoldID = %noneStg%`n secondActiveHoldCount = %secondActiveHoldCount%`n secondActiveHoldID = %noneStg%
-                    Return
-                }
-                If (firstActiveHoldID = "")
-                {
-                    MsgBox,Active window info:`n`n Title = %this_title%`n Class = %this_class%`n PID = %this_PID%`n`n Active Hold info:`n`n firstActiveHoldCount = %firstActiveHoldCount%`n firstActiveHoldID = %noneStg%`n secondActiveHoldCount = %secondActiveHoldCount%`n secondActiveHoldID = %secondActiveHoldID%
-                    Return            
-                }
-                If (secondActiveHoldID = "")
-                {
-                    MsgBox,Active window info:`n`n Title = %this_title%`n Class = %this_class%`n PID = %this_PID%`n`n Active Hold info:`n`n firstActiveHoldCount = %firstActiveHoldCount%`n firstActiveHoldID = %firstActiveHoldID%`n secondActiveHoldCount = %secondActiveHoldCount%`n secondActiveHoldID = %noneStg%
-                    Return            
-                }
-                MsgBox,Active window info:`n`n Title = %this_title%`n Class = %this_class%`n PID = %this_PID%`n`n Active Hold info:`n`n firstActiveHoldCount = %firstActiveHoldCount%`n firstActiveHoldID = %firstActiveHoldID%`n secondActiveHoldCount = %secondActiveHoldCount%`n secondActiveHoldID = %secondActiveHoldID%
+                GetActiveWindowData()
                 Return
         ;All active Windows
             allActiveLab:
-                WinGet,Windows,List
-                MsgBox, %Windows% Non Hidden Windows
-                Loop,%Windows%
-                {
-                    this_id := "ahk_id " . Windows%A_Index%
-                    WinGetTitle, this_title, %this_id%
-                    WinGetClass, this_class, %this_id%
-                    WinGet, this_PID, PID, %this_id%
-                    MsgBox, Title = %this_title%`n Class = %this_class%`n PID = %this_PID%
-                }
+                GetAllWindows()
                 Return
         ;Script reload
             reloadLab: 
-                currAct := WinActive("A")
-                MsgBox, Reloading Script dailyDriver.ahk
-                Reload
-                WinActivate, ahk_id %currAct%
+                ReloadScript()
                 return
         ;Open helper GUI
             helperGUILab:
-                RunWait, HelperGUI.ahk
+                HelperGUI()
+                Return
+        ;Kill current active process/close tab
+            killProcessLab:
+                KillProcess()
+                Return
+        ;OSD Test
+            TestLab:
                 Return
     ;Application min, max, and monitor cycle
         ;Maximize or restore toggle for active window 
             maxToggleLab:
-                WinGet, winState, MinMax, A
-                if (winState = 0 || winState = -1 )
-                {
-                    WinMaximize, A
-                    return
-                }
-                If (winState = 1)
-                {
-                    WinRestore, A
-                    Return
-                }
+                MaxToggle()
+                Return
         ;Move active window to other monitor
             monitorCycleLab:
-                Send, {LWinDown}{ShiftDown}{Left}{ShiftUp}{LWinUp}
+                CycleMonitor()
                 Return
         ;Set Monitor 1 only
             monitor1OnlyLab:
-                Run cmd.exe /c C:\Windows\System32\DisplaySwitch.exe /internal ,,Hide
+                Monitor1OnlyConfig()       
                 Return
         ;Set monitor 2 only
             monitor2OnlyLab:
-                Run cmd.exe /c C:\Windows\System32\DisplaySwitch.exe /external ,,Hide
+                Monitor2OnlyConfig()
                 Return
         ;Set extended monitor layout
             monitorExtendLab:
-                RunWait, cmd.exe /c C:\Windows\System32\DisplaySwitch.exe /extend ,,Hide
-                Return
-        ;Restore window config
-            restoreWinPosLab:
-                Return            
-    ;Application process kill  
-        ;Kill current active process/close tab
-            killProcessLab:
-                current := WinExist("A")
-                WinGetClass, this_class, ahk_id %current%
-                WinGetTitle, this_title, ahk_id %current%
-                If (this_class = "MozillaWindowClass")
-                {
-                    Send, {CtrlDown}{F4}{CtrlUp}
-                    Return
-                }
-                If (this_title ~= "Google Chrome")
-                {
-                    Send, {CtrlDown}{F4}{CtrlUp}
-                    Return
-                }
-                Else
-                {
-                    WinClose, A
-                    Return
-                }
-                Return
+                MonitorExtendConfig()
+                Return         
     ;Application open and make active. Cycle tabs
-        ;First active hold key/make active
-            firstActiveHoldLab:
-                If (firstActiveHoldCount = 0)
-                {
-                    firstActiveHoldID := WinExist("A")
-                    If (firstActiveHoldID = "")
-                    {
-                        MsgBox,, Notice, No active window was selected try again, 1
-                        Return
-                    }
-                    firstActiveHoldCount++
-                    Return
-                }
-                If (firstActiveHoldCount = 1)
-                {
-                    ;error handling
-                    If (firstActiveHoldID = "")
-                    {
-                        MsgBox,, Notice, No active window held, 1
-                        firstActiveHoldCount := 0 
-                        Return
-                    }
-                    IfWinActive, ahk_id %firstActiveHoldID%
-                    {
-                        Return
-                    }
-                    IfWinNotActive, ahk_id %firstActiveHoldID%
-                    {
-                        WinActivate, ahk_id %firstActiveHoldID%
-                        Return
-                    }
-                }           
-                Return   
-        ;Second active hold key/make active
-            secondActiveHoldLab:
-                If (secondActiveHoldCount = 0)
-                {
-                    secondActiveHoldID := WinExist("A")
-                    If (secondActiveHoldID = "")
-                    {
-                        MsgBox,, Notice, No active window was selected try again., 1
-                        Return
-                    }
-                    secondActiveHoldCount++
-                    Return
-                }
-                If (secondActiveHoldCount = 1)
-                {
-                    ;error handling
-                    If (secondActiveHoldID = "")
-                    {
-                        MsgBox,, Notice, No active window held, 1
-                        secondActiveHoldCount := 0 
-                        Return
-                    }
-                    IfWinActive, ahk_id %secondActiveHoldID%
-                    {
-                        Return
-                    }
-                    IfWinNotActive, ahk_id %secondActiveHoldID%
-                    {
-                        WinActivate, ahk_id %secondActiveHoldID%
-                        Return
-                    }
-                }           
-                Return 
-        ;First active hold clear
-            firstActiveClearLab:
-                firstHold := WinActive("A")
-                firstActiveHoldCount := 0
-                firstActiveHoldID := ""
-                MsgBox,, Notice, First window hold cleared, 1
-                WinActivate, ahk_id %firstHold%
-                Return
-        ;Second active hold clear
-            secondActiveClearLab:
-                secondHold := WinActive("A")
-                secondActiveHoldCount := 0
-                secondActiveHoldID := ""
-                MsgBox,, Notice, Second window hold cleared, 1
-                WinActivate, ahk_id %secondHoldHold%
-                Return 
         ;Firefox Default Account make active/cycle tabs
-            ffOpenMainLab:
-                profile := "-Main-" 
-                profileName := "default-release-1"
-                IfWinExist, %profile%
-                {
-                    WinGet, actCheck, ID, %profile%
-                    currActive := WinExist("A")              
-                    If (currActive = actCheck)
-                    {
-                        Send, {Ctrl Down}{PgDn}{Ctrl Up} 
-                        return                  
-                    }
-                    Else 
-                    {
-                        WinActivate, ahk_id %actCheck%
-                        Return
-                    }
-                    Return
-                }
-                IfWinNotExist, %profile%
-                {
-                    Run, C:\Program Files\Mozilla Firefox\firefox.exe -p %profileName% -new-tab about:home ,,Hide
-                    WinWait, %profile%
-                    Return
-                } 
+            MainBrowserLab:
+                MainBrowerLaunchActive()
                 Return
         ;Firefox Alt Account make active/cycle tabs
-            ffOpenAltLab:
-                profile := "-Hifi-" 
-                profileName := "default-nightly"
-                IfWinExist, %profile%
-                {
-                    WinGet, actCheck, ID, %profile%
-                    currActive := WinExist("A")              
-                    If (currActive = actCheck)
-                    {
-                        Send, {Ctrl Down}{PgDn}{Ctrl Up} 
-                        return                  
-                    }
-                    Else 
-                    {
-                        WinActivate, ahk_id %actCheck%
-                        Return
-                    }
-                    Return
-                }
-                IfWinNotExist, %profile%
-                {
-                    Run, C:\Program Files\Firefox Nightly\firefox.exe -p %profileName% -new-tab about:home ,,Hide
-                    WinWait, %profile%
-                    Return
-                } 
+            SecondBrowserLab:
+                SecondBrowerLaunchActive()
                 Return
         ;Visual Studio make active/cycle tabs
             VSCodeOpenLab:
-                profile := "Visual Studio Code"
-                IfWinExist, %profile%
-                {
-                    WinGet, actCheck, ID, %profile%
-                    currActive := WinExist("A")              
-                    If (currActive = actCheck)
-                    {
-                        Send, {Ctrl Down}{PgDn}{Ctrl Up} 
-                        return                  
-                    }
-                    Else 
-                    {
-                        WinActivate, ahk_id %actCheck%
-                        Return
-                    }
-                    Return
-                }
-                IfWinNotExist, %profile%
-                {
-                    Run, "C:\Users\Colton\AppData\Local\Programs\Microsoft VS Code\Code.exe" ,,Hide
-                    Return
-                } 
+                VSCodeLaunchActive()
                 Return  
         ;TIDAL make active/open
             tidalOpenLab:
-                IfWinExist, ahk_exe TIDAL.exe
-                {
-                    WinGet,tidalActive,ID, ahk_exe TIDAL.exe
-                    WinActivate, ahk_id %tidalActive%
-                    Return
-                }
-                IfWinNotExist, ahk_exe TIDAL.exe
-                {
-                    Runwait, "C:\Users\Colton\AppData\Local\TIDAL\TIDAL.exe" ,,Hide
-                    Return
-                } 
+                TidalLaunchActive()
                 Return
-        ;Spotify make active/open
-            spotifyOpenLab:
-                IfWinExist, ahk_exe C:\Users\Colton\AppData\Roaming\Spotify\Spotify.exe
-                {
-                    WinGet,spotActive,ID, ahk_exe C:\Users\Colton\AppData\Roaming\Spotify\Spotify.exe
-                    WinActivate, ahk_id %spotActive%
-                    Return
-                }
-                IfWinNotExist, ahk_exe C:\Users\Colton\AppData\Roaming\Spotify\Spotify.exe
-                {
-                    RunWait, "C:\Users\Colton\AppData\Roaming\Spotify\Spotify.exe" ,,Hide
-                    Return
-                } 
         ;Pocket Casts make active/open
             PCOpenLab:    
-                IfWinExist, Pocket Casts Desktop
-                {
-                    WinGet,spotActive,ID, Pocket Casts Desktop
-                    WinActivate, ahk_id %spotActive%
-                    Return
-                }
-                IfWinNotExist, Pocket Casts Desktop
-                {
-                    RunWait, "C:\Users\Colton\Documents\WindowsAppLink\Pocket Casts Desktop"
-                    Return
-                } 
+                PCLaunchActive()
+                Return
         ;VLC Player make active/open
             vlcOpenLab:
-                IfWinActive, VLC media player
-                {
-                    Sleep, 100
-                    Send, {CtrlDown}1{CtrlUp}
-                    Return
-                }
-                IfWinExist, VLC media player
-                {
-                    WinGet,spotActive,ID, VLC media player
-                    WinActivate, ahk_id %spotActive%
-                    Return
-                }
-                IfWinNotExist, VLC media player
-                {
-                    Runwait, "C:\Program Files\VideoLAN\VLC\vlc.exe"
-                    return
-                }                
+                VLCLaunchActive()
+                Return               
         ;Photoshop make active/open cycle tabs  
             psOpenLab:
-                IfWinExist, ahk_exe photoshop.exe
-                {
-                    WinGet, PSActive, ID, ahk_exe C:\Program Files\Adobe\Adobe Photoshop 2020\photoshop.exe
-                    currActive := WinExist("A")              
-                    If (currActive = PSActive)
-                    {
-                        Send, {Ctrl Down}{Tab}{Ctrl Up} 
-                        return                  
-                    }
-                    Else 
-                    {
-                        WinActivate, ahk_id %PSActive%
-                        Return
-                    }
-                }
-                IfWinNotExist, ahk_exe photoshop.exe
-                {
-                    Run, "C:\Program Files\Adobe\Adobe Photoshop 2020\photoshop.exe" ,,Hide
-                    Return
-                }
+                PSLaunchActive()
+                Return
         ;Steam Main make active/open 
             steamOpenMainLab:
-                IfWinExist, ahk_exe steam.exe
-                {
-                    WinGet, steamID, ID, Steam
-                    WinActivate, ahk_id %steamID%
-                    Return
-                }
-                IfWinNotExist, ahk_exe steam.exe
-                {
-                    MsgBox,,, Starting Main Steam, 1
-                    Process, close, steam.exe
-                    ;location of .bat must be changed
-                    Run, "C:\Users\Colton\Documents\SteamMain.bat" ,,Hide
-                }
-                return
+                SteamMainLaunchActive()
+                Return
         ;Steam Alt make active/open
             steamOpenAltLab:
-                IfWinExist, ahk_exe steam.exe
-                {
-                    WinGet, steamID, ID, Steam
-                    WinActivate, ahk_id %steamID%
-                    Return
-                }
-                IfWinNotExist, ahk_exe steam.exe 
-                {
-                    MsgBox,,, Starting Alt Steam, 1
-                    Process, close, steam.exe
-                    ;location of .bat must be changed
-                    Run, "C:\Users\Colton\Documents\SteamPBX.bat" ,,Hide
-                    Return
-                }
+                SteamAltLaunchActive()
                 Return
         ;Koolertron Editor active/open
             koolertronOpenLab:
-                IfWinExist, AMAKeyboardClient
-                {
-                    WinGet,koolActive,ID, AMAKeyboardClient
-                    WinActivate, ahk_id %koolActive%
-                    Return
-                }
-                IfWinNotExist, AMAKeyboardClient
-                {
-                    RunWait, "C:\Users\Colton\Documents\amag\amag\AMAG_EN\AMAG.exe" ,,Hide
-                    amagID := WinExist(ahk_exe "C:\Users\Colton\Documents\amag\amag\AMAG_EN\AMAG.exe")
-                    WinActivate, ahk_id %amagID%
-                    Return
-                }
+                KoolertronLaunchActive()
+                Return
         ;Volume mixer open/make active
             volMixOpenLab:
-                IfWinNotExist, ahk_exe SndVol.exe
-                {
-                    Run C:\Windows\System32\SndVol.exe 
-                    WinWait, ahk_exe SndVol.exe    
-                    WinActivate, ahk_exe SndVol.exe               
-                }  
-                If WinExist("ahk_exe SndVol.exe")  
-                    WinActivate, ahk_exe SndVol.exe
+                VolMixerLaunchActive()
                 Return
     ;Application new tabs
         ;Firefox Default Account open new tab
@@ -720,8 +378,8 @@ SetTitleMatchMode, 2
         ;Mute channels    
             ;Mute Focused volume
                 focusVolMuteLab: 
-                    SoundViewtxtFile := fixedDocPath . "/AHKPercentHolds/FocusedPercent.txt"
-                    FocusedAppHoldFile := fixedDocPath . "/AHKPercentHolds/FocusedHold.txt"
+                    SoundViewtxtFile := ahkHoldPath . "FocusedPercent.txt"
+                    FocusedAppHoldFile := ahkHoldPath . "FocusedHold.txt"
                     ActiveAHKID := WinExist("A")
                     WinGet, ActivePID, PID, ahk_id %ActiveAHKID%
                     If (FocusMuteHold != 0)
@@ -811,11 +469,11 @@ SetTitleMatchMode, 2
                     return                  
             ;Mute Media volume
                 mediaVolMuteLab:
-                    MediaHoldFilePath := fixedDocPath . "/AHKPercentHolds/MediaHold.txt"
+                    MediaHoldFilePath := ahkHoldPath . "MediaHold.txt"
                     FileDelete, %MediaHoldFilePath%
                     IfWinExist, -Main-
                     {
-                    txtFile := fixedDocPath . "/AHKPercentHolds/MainFirefoxPercents.txt"
+                    txtFile := ahkHoldPath . "MainFirefoxPercents.txt"
                     WinGet, ActivePID, PID, -Main-
                     Runwait, cmd.exe /c SoundVolumeView.exe /stab "" | GetNir "Volume Percent" "ProcessID= %ActivePID%" > %txtFile% ,,Hide 
                     FileReadLine, PercentVal, %txtFile%, 1
@@ -826,7 +484,7 @@ SetTitleMatchMode, 2
                     }
                     IfWinExist, -Hifi-
                     {
-                    txtFile := fixedDocPath . "/AHKPercentHolds/HifiFirefoxPercents.txt"
+                    txtFile := ahkHoldPath . "HifiFirefoxPercents.txt"
                     WinGet, ActivePID, PID, -Hifi-
                     Runwait, cmd.exe /c SoundVolumeView.exe /stab "" | GetNir "Volume Percent" "ProcessID= %ActivePID%" > %txtFile% ,,Hide 
                     FileReadLine, PercentVal, %txtFile%, 1
@@ -837,7 +495,7 @@ SetTitleMatchMode, 2
                     }
                     IfWinExist, Google Chrome
                     {
-                    txtFile := fixedDocPath . "/AHKPercentHolds/ChromePercents.txt"
+                    txtFile := ahkHoldPath . "ChromePercents.txt"
                     WinGet, ActivePID, PID, Google Chrome
                     Runwait, cmd.exe /c SoundVolumeView.exe /stab "" | GetNir "Volume Percent" "ProcessID= %ActivePID%" > %txtFile% ,,Hide 
                     FileReadLine, PercentVal, %txtFile%, 1
@@ -848,7 +506,7 @@ SetTitleMatchMode, 2
                     }
                     IfWinExist, ahk_exe TIDAL.exe
                     {
-                    txtFile := fixedDocPath . "/AHKPercentHolds/TidalPercents.txt"
+                    txtFile := ahkHoldPath . "TidalPercents.txt"
                     WinGet, ActivePID, PID, ahk_exe TIDAL.exe
                     Runwait, cmd.exe /c SoundVolumeView.exe /stab "" | GetNir "Volume Percent" "ProcessID= %ActivePID%" > %txtFile% ,,Hide 
                     FileReadLine, PercentVal, %txtFile%, 1
@@ -859,7 +517,7 @@ SetTitleMatchMode, 2
                     }
                     IfWinExist, ahk_exe Spotify.exe
                     {
-                    txtFile := fixedDocPath . "/AHKPercentHolds/SpotifyPercents.txt"
+                    txtFile := ahkHoldPath . "SpotifyPercents.txt"
                     WinGet, ActivePID, PID, ahk_exe Spotify.exe
                     Runwait, cmd.exe /c SoundVolumeView.exe /stab "" | GetNir "Volume Percent" "ProcessID= %ActivePID%" > %txtFile% ,,Hide 
                     FileReadLine, PercentVal, %txtFile%, 1
@@ -870,7 +528,7 @@ SetTitleMatchMode, 2
                     }
                     IfWinExist, Pocket Casts
                     {
-                    txtFile := fixedDocPath . "/AHKPercentHolds/PocketCastsPercents.txt"
+                    txtFile := ahkHoldPath . "PocketCastsPercents.txt"
                     WinGet, ActivePID, PID, Pocket Casts
                     Runwait, cmd.exe /c SoundVolumeView.exe /stab "" | GetNir "Volume Percent" "ProcessID= %ActivePID%" > %txtFile% ,,Hide 
                     FileReadLine, PercentVal, %txtFile%, 1
@@ -881,7 +539,7 @@ SetTitleMatchMode, 2
                     }
                     IfWinExist, VLC media player
                     {
-                    txtFile := fixedDocPath . "/AHKPercentHolds/VLCPercents.txt"
+                    txtFile := ahkHoldPath . "VLCPercents.txt"
                     WinGet, ActivePID, PID, VLC media player
                     Runwait, cmd.exe /c SoundVolumeView.exe /stab "" | GetNir "Volume Percent" "ProcessID= %ActivePID%" > %txtFile% ,,Hide 
                     FileReadLine, PercentVal, %txtFile%, 1
@@ -893,7 +551,7 @@ SetTitleMatchMode, 2
                     return    
             ;Unmute/Restore Media volume
                 mediaVolUnmuteLab:
-                    MediaHoldFilePath := fixedDocPath . "/AHKPercentHolds/MediaHold.txt"                
+                    MediaHoldFilePath := ahkHoldPath . "MediaHold.txt"                
                     Loop, Read, %MediaHoldFilePath%
                     {
                         StringSplit, HoldArr, A_LoopReadLine, \
@@ -910,7 +568,7 @@ SetTitleMatchMode, 2
                     return
             ;Mute Line In volume
                 lineVolMuteLab:
-                    txtFile := fixedDocPath . "/AHKPercentHolds/LineInPercent.txt"
+                    txtFile := ahkHoldPath . "LineInPercent.txt"
                     Runwait, cmd.exe /c SoundVolumeView.exe /stab "" | GetNir "Volume Percent" "ProcessID= %LineInPID%" > %txtFile% ,,Hide 
                     FileReadLine, PercentVal, %txtFile%, 1
                     StringTrimRight, trimmedPercentVal, PercentVal, 1
@@ -1286,6 +944,12 @@ SetTitleMatchMode, 2
                     percentCurrVol := currVol / 100
                     percentRecalc := 0.02 / percentCurrVol
                     Run cmd.exe /c start nircmd.exe changeappvolume /%LineInPID% -%percentRecalc% ,,Hide
+                    LineInTrimmed := Round(LineInTrimmed - 2)
+                    If (LineInTrimmed <= 0)
+                    {
+                        LineInTrimmed := 0
+                    }
+                    OSDGui("Line In","Volume",LineInTrimmed)
                     Return
             ;Line in volume control up 2% 
                 lineVolUp1Lab: 
@@ -1293,6 +957,14 @@ SetTitleMatchMode, 2
                     percentCurrVol := currVol / 100
                     percentRecalc := 0.02 / percentCurrVol
                     Run cmd.exe /c start nircmd.exe changeappvolume /%LineInPID% +%percentRecalc% ,,Hide
+                    LineInTrimmed := Round(LineInTrimmed + 2)
+                    SoundGet, currSysVol
+                    If (LineInTrimmed >= currSysVol)
+                    {
+                        LineInTrimmed := round(currSysVol)
+                    }
+                    OSDGui("Line In","Volume",LineInTrimmed)
+                    Return
                     Return
             ;Line in volume control down 5%
                 lineVolDown5Lab:  
@@ -1377,40 +1049,88 @@ SetTitleMatchMode, 2
         ;Main room Light bulb on/off + brightness
             ;Turn off bulb
                 lampOffLab:
-                Runwait cmd.exe /c kasa --bulb --alias Coltons_Lamp off ,,Hide 
+                Runwait cmd.exe /c kasa --host 192.168.1.180 --bulb off ,,Hide 
                 MsgBox,, Lamp Notice, Turning lamp off, 1
+                lampOnOffState :=0
                 return
             ;Turn on/brightness 1%
                 lamp1Lab:
-                Runwait cmd.exe /c kasa --bulb --alias Coltons_Lamp brightness 1 ,,Hide
+                Runwait cmd.exe /c kasa --host 192.168.1.180 --bulb brightness 1 ,,Hide
                 lampBrightVal := 1
+                lampOnOffState :=1
                 MsgBox,, Lamp Notice, Setting lamp to 1 percent brightness, 1            
                 return
-            ;Turn on/brightness down 10%
+            ;Turn on @ 10% or Brightness down 10%
                 lampBrightDownLab:
-                lampBrightVal := lampBrightVal - 10
-                If (lampBrightVal <= 1)
+                If (lampOnOffState = 0)
                 {
-                    lampBrightVal := 1
-                    MsgBox,, Lamp Notice, lamp brightness bottomed out , 1
-                    return 
+                    lampOnOffState := 1
+                    lampBrightVal := 10
+                    Runwait cmd.exe /c kasa --host 192.168.1.180 --bulb brightness 10 ,,Hide  
+                    MsgBox,, Lamp Notice, Setting lamp brightness to 10 , 1                    
+                    return                  
                 }
-                Runwait cmd.exe /c kasa --bulb --alias Coltons_Lamp brightness %lampBrightVal% ,,Hide
-                MsgBox,, Lamp Notice, Decreasing lamp brightness to %lampBrightVal% , 1 
+                If (lampOnOffState = 1)
+                {
+                    lampBrightVal := lampBrightVal - 10
+                    If (lampBrightVal <= 1)
+                    {
+                        lampBrightVal := 1
+                        Runwait cmd.exe /c kasa --host 192.168.1.180 --bulb brightness %lampBrightVal% ,,Hide
+                        MsgBox,, Lamp Notice, lamp brightness bottomed out , 1
+                        return 
+                    }
+                    Runwait cmd.exe /c kasa --host 192.168.1.180 --bulb brightness %lampBrightVal% ,,Hide
+                    MsgBox,, Lamp Notice, Decreasing lamp brightness to %lampBrightVal% , 1 
+                    return
+                }
                 return
-            ;Turn on/brightness up 10%
+            ;Turn on @ 30% or Brightness up 10%
                 lampBrightUpLab:
-                lampBrightVal := lampBrightVal + 10
-                If (lampBrightVal >= 100)
+                If (lampOnOffState = 0)
                 {
-                    lampBrightVal := 100
-                    MsgBox,, Lamp Notice, lamp brightness maxed out , 1
-                    return 
+                    lampOnOffState := 1
+                    lampBrightVal := 30
+                    Runwait cmd.exe /c kasa --host 192.168.1.180 --bulb brightness 30 ,,Hide  
+                    MsgBox,, Lamp Notice, Setting lamp brightness to 30 , 1                    
+                    return                  
                 }
-                Runwait cmd.exe /c kasa --bulb --alias Coltons_Lamp brightness %lampBrightVal% ,,Hide
-                MsgBox,, Lamp Notice, Increasing lamp brightness to %lampBrightVal% , 1 
+                If (lampOnOffState = 1)
+                {
+                    lampBrightVal := lampBrightVal + 10
+                    If (lampBrightVal >= 100)
+                    {
+                        lampBrightVal := 100
+                        Runwait cmd.exe /c kasa --host 192.168.1.180 --bulb brightness %lampBrightVal% ,,Hide
+                        MsgBox,, Lamp Notice, lamp brightness maxed out , 1
+                        return 
+                    }
+                    Runwait cmd.exe /c kasa --host 192.168.1.180 --bulb brightness %lampBrightVal% ,,Hide
+                    MsgBox,, Lamp Notice, Increasing lamp brightness to %lampBrightVal% , 1 
+                    return
+                }
                 return
             ;Lamp Gui
                 lampGUILab:
+                lampGuiStatePath := ahkHoldPath . "LampState.txt"
                 Runwait, LampGUI.ahk
+                Runwait cmd.exe /c kasa --host 192.168.1.180 --bulb > %lampGuiStatePath% ,,Hide
+                FileReadLine, pStateFullLine, %lampGuiStatePath%, 21
+                StringTrimLeft, pStateNoLeft, pStateFullLine, 13
+                StringTrimRight, pStateVal, pStateNoLeft, 32
+                If (pStateVal = 0)
+                {
+                    lampOnOffState := 0
+                }
+                If (pStateVal > 0)
+                {
+                    lampOnOffState := 1
+                }
                 return
+    ;Gui Destroy
+            Esc::
+                IfWinActive, ahk_class AutoHotkeyGUI
+                {
+                    WinClose, A
+                    Return
+                }
