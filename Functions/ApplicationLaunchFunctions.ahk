@@ -7,16 +7,14 @@
         profileName := "default"
         IfWinExist, %titleTag% ahk_class %appClass%
         {
-            WinGet, actCheck, ID, %titleTag% ahk_class %appClass%
-            currActive := WinExist("A")              
-            If (currActive = actCheck)
+            IfWinActive, %titleTag% ahk_class %appClass%
             {
                 Send, {Ctrl Down}{PgDn}{Ctrl Up} 
                 return                  
             }
-            Else 
+            IfWinNotActive, %titleTag% ahk_class %appClass%
             {
-                WinActivate, ahk_id %actCheck%
+                WinActivate, %titleTag% ahk_class %appClass%
                 Return
             }
             Return
@@ -33,22 +31,20 @@
 ;Second Browser/Account open or make active
     SecondBrowerLaunchActive()
     {
-        exePath := "C:\Users\Colton\AppData\Local\Vivaldi\Application\vivaldi.exe"
+        exePath := "C:\Users\" . A_UserName . "\AppData\Local\Vivaldi\Application\vivaldi.exe"
         titleTag := "Vivaldi" 
         appClass := "Chrome_WidgetWin_1"
         profileName := "Default"
         IfWinExist, %titleTag% ahk_class %appClass%
         {
-            WinGet, actCheck, ID, %titleTag% ahk_class %appClass%
-            currActive := WinExist("A")              
-            If (currActive = actCheck)
+            IfWinActive, %titleTag% ahk_class %appClass%
             {
                 Send, {Ctrl Down}{PgDn}{Ctrl Up} 
                 return                  
             }
-            Else 
+            IfWinNotActive, %titleTag% ahk_class %appClass%
             {
-                WinActivate, ahk_id %actCheck%
+                WinActivate, %titleTag% ahk_class %appClass%
                 Return
             }
             Return
@@ -56,7 +52,8 @@
         IfWinNotExist, %titleTag% ahk_class %appClass%
         {
             Run, %exePath% --profile-directory=%profileName%
-            WinActivate, ahk_pid runPID 
+            WinWait, %titleTag% ahk_class %appClass%
+            WinActivate, %titleTag% ahk_class %appClass% 
             Sleep, 1500
             Return
         } 
@@ -123,7 +120,7 @@
 ;Pocket Casts open or make active
     PCLaunchActive()
     {
-        exePath := "C:\Users\Colton\AppData\Local\Programs\Microsoft VS Code\Code.exe"
+        exePath := "C:\Users\Colton\Documents\WindowsAppLink\Pocket Casts Desktop"
         titleTag := "Pocket Casts Desktop"
         appClass := "ApplicationFrameWindow"
         IfWinExist, %titleTag% ahk_class %appClass%
@@ -312,5 +309,33 @@
         }  
         Return
     }
-    
+;Twitch App Launch
+    TwitchLaunchActive()
+    {
+        exePath := A_AppData . "\Twitch\Bin\Twitch.exe"
+        titleTag := "Twitch"
+        appClass := "Chrome_WidgetWin_1"
+        IfWinExist, %titleTag% ahk_class %appClass%
+        {       
+            IfWinActive, %titleTag% ahk_class %appClass%
+            {
+                Send, {Media_Play_Pause}
+                return                  
+            }
+            Else 
+            {
+                WinActivate,  %titleTag% ahk_class %appClass%
+                Return
+            }
+            Return
+        }
+        IfWinNotExist, %titleTag% ahk_class %appClass%
+        {
+            RunWait, %exePath%,,,runPID
+            WinActivate, ahk_pid runPID 
+            Sleep, 500
+            Return
+        } 
+        Return   
+    } 
 

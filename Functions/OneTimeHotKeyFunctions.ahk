@@ -119,7 +119,8 @@
         }
         If (this_title ~= "Vivaldi")
         {
-            Send, {CtrlDown}{F4}{CtrlUp}
+            KeyWait, Shift
+            Send, {CtrlDown}{AltDown}{ShiftDown}5{ShiftUp}{AltUp}{CtrlUp}
             Return
         }
         Else
