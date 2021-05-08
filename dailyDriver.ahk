@@ -15,18 +15,21 @@
     ;C5/6 = >+ RT SHIFT
 
 SetTitleMatchMode, 2
-#Include, Functions/Functions.ahk
 #Include, Functions/OneTimeHotKeyFunctions.ahk
 #Include, Functions/ApplicationPosFunctions.ahk
 #Include, Functions/ApplicationLaunchFunctions.ahk
 #Include, Functions/VolumeControlFunctions.ahk
+#Include, Functions/SoundOutputEqFunctions.ahk
+#Include, Functions/LampFunctions.ahk
 
+reloadBrightness := GetLampBrightness()
 ;Global variables
     StringReplace, fixedDocPath, A_MyDocuments, \, /, All]
     ahkHoldPath := fixedDocPath . "/AHKPercentHolds/"
     LineInPID := grabInputPID()
     lampBrightVal := 1
-    lampOnOffState := 0
+    lampOnOffState := GetLampState()
+    MsgBox,, Notice, Script load complete, 1
 ;HOTKEYS 
     ;HOTKEYS Media Keys 
         ;Track control
@@ -444,110 +447,68 @@ SetTitleMatchMode, 2
         ;Switch output with EQ change
             ;Set BTA30 Digital output/Peace EQ XM4
                 DOEQLab:
-                Run cmd.exe /c start nircmd.exe setdefaultsounddevice "Digital Output" 1 ,,Hide
-                Run cmd.exe /c start nircmd.exe setdefaultsounddevice "Digital Output" 2 ,,Hide
-                Send, {ShiftDown}{AltDown}{CtrlDown}{Numpad0}{CtrlUp}{AltUp}{ShiftUp}
-                return
+                    SwitchBTA30(1, "BTA 30", "Sony WH-1000XM4")
+                    Sleep, 1000
+                    Return
             ;Set Logitech Pro X output/Peace EQ Pro X
                 LPXEQLab:
-                Run cmd.exe /c start nircmd.exe setdefaultsounddevice "Pro X" 1 ,,Hide
-                Run cmd.exe /c start nircmd.exe setdefaultsounddevice "Pro X" 2 ,,Hide
-                Send, {ShiftDown}{AltDown}{CtrlDown}{Numpad1}{CtrlUp}{AltUp}{ShiftUp}
-                return
+                    SwitchProX(2, "Logitech Pro X", "Pro X") 
+                    Sleep, 1000
+                    Return
             ;Set FiiO K5 Speaker output/Peace EQ 770 80ohm
                 K5770EQLab:
-                Run cmd.exe /c start nircmd.exe setdefaultsounddevice "K5 Pro" 1 ,,Hide
-                Run cmd.exe /c start nircmd.exe setdefaultsounddevice "K5 Pro" 2 ,,Hide
-                Send, {ShiftDown}{AltDown}{CtrlDown}{Numpad2}{CtrlUp}{AltUp}{ShiftUp}
-                return
+                    SwitchK5Pro(3,"Fiio K5 Pro","Beyerdynamic DT770 80 ohm")
+                    Sleep, 1000
+                    Return
             ;Set FiiO K5 Speaker output/Peace EQ MK5
-                K5MK5EQLab:
-                Run cmd.exe /c start nircmd.exe setdefaultsounddevice "K5 Pro" 1 ,,Hide
-                Run cmd.exe /c start nircmd.exe setdefaultsounddevice "K5 Pro" 2 ,,Hide
-                Send, {ShiftDown}{AltDown}{CtrlDown}{Numpad3}{CtrlUp}{AltUp}{ShiftUp}
-                return  
+                K5MK5EQLab: 
+                    SwitchK5Pro(4,"Fiio K5 Pro","Etymotic Research MK5")
+                    Sleep, 1000
+                    Return
     ;Kasa lighting
         ;Main room Light bulb on/off + brightness
             ;Turn off bulb
                 lampOffLab:
-                Runwait cmd.exe /c kasa --host 192.168.1.180 --bulb off ,,Hide 
-                MsgBox,, Lamp Notice, Turning lamp off, 1
-                lampOnOffState :=0
-                return
+                    LampOff()
+                    lampOnOffState :=0
+                    return
             ;Turn on/brightness 1%
                 lamp1Lab:
-                Runwait cmd.exe /c kasa --host 192.168.1.180 --bulb brightness 1 ,,Hide
-                lampBrightVal := 1
-                lampOnOffState :=1
-                MsgBox,, Lamp Notice, Setting lamp to 1 percent brightness, 1            
-                return
+                    lampBrightVal := LampBrightness(1,lampOnOffState)
+                    lampOnOffState := 1            
+                    return
             ;Turn on @ 10% or Brightness down 10%
                 lampBrightDownLab:
                 If (lampOnOffState = 0)
                 {
+                    lampBrightVal := LampBrightness(10,lampOnOffState)
                     lampOnOffState := 1
-                    lampBrightVal := 10
-                    Runwait cmd.exe /c kasa --host 192.168.1.180 --bulb brightness 10 ,,Hide  
-                    MsgBox,, Lamp Notice, Setting lamp brightness to 10 , 1                    
-                    return                  
+                    Return
                 }
                 If (lampOnOffState = 1)
                 {
-                    lampBrightVal := lampBrightVal - 10
-                    If (lampBrightVal <= 1)
-                    {
-                        lampBrightVal := 1
-                        Runwait cmd.exe /c kasa --host 192.168.1.180 --bulb brightness %lampBrightVal% ,,Hide
-                        MsgBox,, Lamp Notice, lamp brightness bottomed out , 1
-                        return 
-                    }
-                    Runwait cmd.exe /c kasa --host 192.168.1.180 --bulb brightness %lampBrightVal% ,,Hide
-                    MsgBox,, Lamp Notice, Decreasing lamp brightness to %lampBrightVal% , 1 
-                    return
+                    lampBrightVal := LampBrightness(-10,lampOnOffState)
+                    Return
                 }
                 return
             ;Turn on @ 30% or Brightness up 10%
                 lampBrightUpLab:
                 If (lampOnOffState = 0)
                 {
+                    lampBrightVal := LampBrightness(30,lampOnOffState)
                     lampOnOffState := 1
-                    lampBrightVal := 30
-                    Runwait cmd.exe /c kasa --host 192.168.1.180 --bulb brightness 30 ,,Hide  
-                    MsgBox,, Lamp Notice, Setting lamp brightness to 30 , 1                    
-                    return                  
+                    Return
                 }
                 If (lampOnOffState = 1)
                 {
-                    lampBrightVal := lampBrightVal + 10
-                    If (lampBrightVal >= 100)
-                    {
-                        lampBrightVal := 100
-                        Runwait cmd.exe /c kasa --host 192.168.1.180 --bulb brightness %lampBrightVal% ,,Hide
-                        MsgBox,, Lamp Notice, lamp brightness maxed out , 1
-                        return 
-                    }
-                    Runwait cmd.exe /c kasa --host 192.168.1.180 --bulb brightness %lampBrightVal% ,,Hide
-                    MsgBox,, Lamp Notice, Increasing lamp brightness to %lampBrightVal% , 1 
-                    return
+                    lampBrightVal := LampBrightness(10,lampOnOffState)
+                    Return
                 }
                 return
             ;Lamp Gui
                 lampGUILab:
-                lampGuiStatePath := ahkHoldPath . "LampState.txt"
-                Runwait, LampGUI.ahk
-                Runwait cmd.exe /c kasa --host 192.168.1.180 --bulb > %lampGuiStatePath% ,,Hide
-                FileReadLine, pStateFullLine, %lampGuiStatePath%, 21
-                StringTrimLeft, pStateNoLeft, pStateFullLine, 13
-                StringTrimRight, pStateVal, pStateNoLeft, 32
-                If (pStateVal = 0)
-                {
-                    lampOnOffState := 0
-                }
-                If (pStateVal > 0)
-                {
-                    lampOnOffState := 1
-                }
-                return
+                    SetLampGui()
+                    return
     ;Gui Destroy
             Esc::
                 IfWinActive, ahk_class AutoHotkeyGUI
