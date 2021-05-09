@@ -80,6 +80,9 @@ reloadBrightness := GetLampBrightness()
         ;Move active window to other monitor    
             monitorExtendHK := ">+>^F24"
             hotkey, %monitorExtendHK%, monitorExtendLab
+        ;Reset Active Window size    
+            activeSizeResetHK := "<+F16"
+            hotkey, %activeSizeResetHK%, activeSizeResetLab
     ;HOTKEYS Application open and make active. Cycle tabs
         ;Main Browser Account make active/cycle tabs
             MainBrowserHK := ">^F19"
@@ -295,7 +298,11 @@ reloadBrightness := GetLampBrightness()
         ;Set extended monitor layout
             monitorExtendLab:
                 MonitorExtendConfig()
-                Return         
+                Return    
+        ;Reset Active Window size
+            activeSizeResetLab:
+                ActiveSizeReset()
+                Return     
     ;Application open and make active. Cycle tabs
         ;Firefox Default Account make active/cycle tabs
             MainBrowserLab:

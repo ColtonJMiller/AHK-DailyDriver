@@ -20,12 +20,12 @@
         KeyWait, LShift
         GuiControl,, Info/HelperGUIPhotos/NoModifier.png, Info/HelperGUIPhotos/NoModifier.png 
         Return   
-        RAlt::
+        ~RAlt::
         GuiControl,, Info/HelperGUIPhotos/NoModifier.png, Info/HelperGUIPhotos/RAlt.png
         KeyWait, RAlt
         GuiControl,, Info/HelperGUIPhotos/NoModifier.png, Info/HelperGUIPhotos/NoModifier.png
         Return
-        LAlt::
+        ~LAlt::
         Return
     }
 

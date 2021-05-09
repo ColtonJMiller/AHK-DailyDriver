@@ -120,3 +120,14 @@
         LoadWinPositions()
         Return
     }
+;Active Window resize
+    ActiveSizeReset()
+    {
+        WinGet, winState, MinMax, A
+        If (winState = 1 || winState = -1)
+        {
+            WinRestore, A          
+        }
+        WinMove, A,,0,0,500, 500  
+        Return
+    }

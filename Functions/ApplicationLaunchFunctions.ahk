@@ -103,7 +103,7 @@
                 Send, {Ctrl Down}{PgDn}{Ctrl Up} 
                 return                  
             }
-            Else 
+            IfWinNotActive, %titleTag% ahk_class %appClass% 
             {
                 WinActivate, %titleTag% ahk_class %appClass%
                 Return
@@ -112,8 +112,9 @@
         }
         IfWinNotExist, %titleTag% ahk_class %appClass%
         {
-            RunWait, %exePath%,,,runPID
-            WinActivate, %titleTag% ahk_class %appClass%
+            Run, %exePath%,,,runPID
+            WinWait, ahk_pid %runPID%
+            WinActivate, ahk_pid %runPID%
             Sleep, 500
             Return
         } 
