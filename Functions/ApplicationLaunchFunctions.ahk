@@ -59,6 +59,37 @@
         } 
         Return
     }       
+;Chrome Work Profile
+    ChromeWorkLaunchActive()
+    {
+        exePath := "C:\Program Files\Google\Chrome\Application\chrome.exe"
+        titleTag := "Google Chrome" 
+        appClass := "Chrome_WidgetWin_1"
+        profileName := "profile 1"
+        IfWinExist, %titleTag% ahk_class %appClass%
+        {
+            IfWinActive, %titleTag% ahk_class %appClass%
+            {
+                Send, {Ctrl Down}{PgDn}{Ctrl Up} 
+                return                  
+            }
+            IfWinNotActive, %titleTag% ahk_class %appClass%
+            {
+                WinActivate, %titleTag% ahk_class %appClass%
+                Return
+            }
+            Return
+        }
+        IfWinNotExist, %titleTag% ahk_class %appClass%
+        {
+            Run, %exePath% --args --profile-directory=%profileName%
+            WinWait, %titleTag% ahk_class %appClass%
+            WinActivate, %titleTag% ahk_class %appClass% 
+            Sleep, 1500
+            Return
+        } 
+        Return
+    }     
 ;VS Code open or make active
     VSCodeLaunchActive()
     {
@@ -208,60 +239,67 @@
         }
         Return
     } 
-;Steam Main account open or make active
-    SteamMainLaunchActive()
+;Steam Gui Launch
+    SteamGui()
     {
-        titleTag := "Steam"
-        appClass := "vguiPopupWindow"
-        batPath := A_MyDocuments . "\SteamMain.bat"
-        IfWinExist, %titleTag% ahk_class %appClass%
+        global
+        IfWinExist, Steam ahk_class vguiPopupWindow
         {
-            IfWinActive, %titleTag% ahk_class %appClass%
+            MsgBox, 4, Notice, Steam is running. Would you like to close?
+            IfMsgBox, Yes
             {
+                Process, Close, steam.exe 
+                Gui, Font, S25
+                Gui, Add, Text,x10, Steam Selection
+                Gui, Show, w300 h400,Steam Selection GUI
+                Gui, Font, s15
+                Gui, Add, Text,x10, Select Profile to sign in
+                Gui, Add, Radio, x10 vMain, Main
+                Gui, Add, Radio, x10 vAlt, Alt
+                Gui, Add, Button, gSubmit2 ,Submit
                 Return
             }
-            IfWinNotActive, %titleTag% ahk_class %appClass%
+            IfMsgBox, No
             {
-                WinActivate, %titleTag% ahk_class %appClass%
-                Return
-            }
-        }
-        IfWinNotExist, %titleTag% ahk_class %appClass%
-        {
-            MsgBox,,, Starting Main Steam, 1
-            Process, close, steam.exe
-            ;location of .bat must be changed
-            Run, %batPath% ,,Hide
-        }
-        return
-    }
-;Steam Alt account open or make active
-    SteamAltLaunchActive()
-    {
-        titleTag := "Steam"
-        appClass := "vguiPopupWindow"
-        batPath := A_MyDocuments . "\SteamPBX.bat"
-        IfWinExist, %titleTag% ahk_class %appClass%
-        {
-            IfWinActive, %titleTag% ahk_class %appClass%
-            {
-                Return
-            }
-            IfWinNotActive, %titleTag% ahk_class %appClass%
-            {
-                WinActivate, %titleTag% ahk_class %appClass%
+                WinActivate, Steam ahk_class vguiPopupWindow
                 Return
             }
         }
-        IfWinNotExist, %titleTag% ahk_class %appClass%
+        IfWinNotExist, Steam ahk_class vguiPopupWindow
         {
-            MsgBox,,, Starting Alt Steam, 1
-            Process, close, steam.exe
-            ;location of .bat must be changed
-            Run, %batPath% ,,Hide
+            Gui, Font, S25
+            Gui, Add, Text,x10, Steam Selection
+            Gui, Show, w300 h400,Steam Selection GUI
+            Gui, Font, s15
+            Gui, Add, Text,x10, Select Profile to sign in
+            Gui, Add, Radio, x10 vMain, Main
+            Gui, Add, Radio, x10 vAlt, Alt
+            Gui, Add, Button, gSubmit2 ,Submit
+            Return
         }
-        return
-    }
+        Return
+
+        Submit2:
+            mainPath := A_MyDocuments . "\SteamMain.bat"
+            altPath := A_MyDocuments . "\SteamPBX.bat"
+            Gui, Submit
+            if (Main = 1)
+            {
+                Run, %mainPath%,,Hide
+                MsgBox,,Notice, Starting Steam Main. Please Wait., 1
+            }
+            If (Alt = 1)
+            {
+                Run, %altPath%,,Hide
+                MsgBox,,Notice, Starting Steam Alt. Please Wait., 1
+            }
+            Gui, Destroy
+            Return  
+        
+        GuiClose: 
+            Gui, Destroy
+            Return
+    } 
 ;Koolertron Software open or make active 
     KoolertronLaunchActive()
     {
@@ -337,4 +375,69 @@
         } 
         Return   
     } 
+;Youtube Hifi open/make active
+    YouTubeHifiLaunch()
+    {
+        exePath := "C:\Users\" . A_UserName . "\AppData\Local\Vivaldi\Application\vivaldi.exe"
+        titleTag := "Vivaldi" 
+        appClass := "Chrome_WidgetWin_1"
+        profileName := "Default"
+        TitleholdArr := []
+        loopCount := 0
+        IfWinExist, %titleTag% ahk_class %appClass%
+        {
+            TitleHoldArr := []
+            ArrVal := 0
+            needleVal :="YouTube"
+            WinActivate, %titleTag% ahk_class %appClass%
+            While, ArrVal = 0
+            {
+                WinActivate, %titleTag% ahk_class %appClass%
+                WinGetTitle, titleInLoop, %titleTag% ahk_class %appClass%
+                if (TitleHoldArr)
+                {
+                    ArrVal := HasVal(TitleHoldArr,needleVal)
+                }
+                TitleHoldArr.push(titleInLoop)
+                If (ArrVal != 0)
+                {
+                    Send, {Ctrl Down}{PgUp}{Ctrl Up}
+                    Break
+                    MsgBox, Arr is not 0 %ArrVal%
+                }
+                Send, {Ctrl Down}{PgDn}{Ctrl Up}
+            }
+            Return 
+        }
+        IfWinNotExist, %titleTag% ahk_class %appClass%
+        {
+            Run, %exePath% --profile-directory=%profileName% --new-window www.youtube.com
+            WinWait, %titleTag% ahk_class %appClass%
+            WinActivate, %titleTag% ahk_class %appClass% 
+
+            Sleep, 1500
+            Return
+        } 
+        Return
+    }
+;Appdata Folder open
+    AppDataLaunch()
+    {
+        filePath := "C:\Users\" . A_UserName . "\AppData"
+        Run, %filePath%
+        Return
+    }
+;HasVal Dependancy for looping browser tabs 
+    HasVal(haystack, needle) {
+        for index, value in haystack
+            If (needle = "Start Page - Vivaldi")
+            {
+                return 0
+            }
+            if (value ~= needle)
+                return index
+        if !(IsObject(haystack))
+            throw Exception("Bad haystack!", -1, haystack)
+        return 0
+    }
 

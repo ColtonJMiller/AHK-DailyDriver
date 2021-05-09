@@ -63,49 +63,11 @@
     ReloadScript()
     {
         currAct := WinActive("A")
-        MsgBox, Reloading Script dailyDriver.ahk
+        MsgBox,,, Reloading Script dailyDriver.ahk,1
         Reload
         WinActivate, ahk_id %currAct%
         Return
     }
-;HelperGUI
-    HelperGUI()
-    {
-        global
-        loopCount := 1
-        Gui, New, +HwndHelperGuiHwnd, HelperGui
-        Gui, Show, w1000 h800,Koolertron Keybinds
-        GuiControlGet, guiInfo,Pos, text1
-        gui, Show
-        GuiControl, Move, text1, % "x" guiWidth/2 - guiInfoW/2
-        Gui, +Theme +Resize
-        Gui, Color, 484848
-        Gui, Font, s15
-        Gui, add, Picture,w-1 h400, Info/MacropadTemplate.jpg
-        FileReadLine, FullTopColumn, Info/HotkeySheet.txt, 1
-        ;MsgBox, %FullTopColumn%
-        StringSplit, TopHoldArr, FullTopColumn, \
-        ;MsgBox, %TopHoldArr1%
-        Gui, Font, s10
-
-        Gui, Add, ListView, r15 vHotkeys w900, %TopHoldArr1%|%TopHoldArr2%|%TopHoldArr3%|%TopHoldArr4%|%TopHoldArr5%|%TopHoldArr6%|%TopHoldArr7%|%TopHoldArr8%|%TopHoldArr9%|%TopHoldArr10%|%TopHoldArr11%
-        GuiControl, +Title, HotKeys
-
-        Loop, Read, Info/HotkeySheet.txt
-        {
-            StringSplit, HoldArr, A_LoopReadLine, |
-            ;MsgBox, %HoldArr1% %HoldArr2% %HoldArr3% %HoldArr4% %HoldArr5% %HoldArr6% %HoldArr7% %HoldArr8% %HoldArr9% %HoldArr10% %HoldArr11%
-            If (loopCount != 1)
-            {
-                LV_Add(,HoldArr1,HoldArr2,HoldArr3,HoldArr4,HoldArr5,HoldArr6,HoldArr7,HoldArr8,HoldArr9,HoldArr10,HoldArr11)
-            }
-            ;MsgBox, %loopCount%
-            loopCount++
-        }
-        LV_ModifyCol()
-        loopCount := 1
-        return
-    }  
 ;Kill active process    
     KillProcess()
     {

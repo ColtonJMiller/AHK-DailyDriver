@@ -47,16 +47,16 @@ reloadBrightness := GetLampBrightness()
             SheetHK := "<+<^<!H"
             hotkey, %SheetHK%, sheetLab
         ;All active Windows
-            allActiveHK := "<+<^!K"
+            allActiveHK := ">+F22"
             hotkey, %allActiveHK%, allActiveLab
         ;Script reload
-            reloadHK := "<+<!R"
+            reloadHK := ">+F23"
             hotkey, %reloadHK%, reloadLab
         ;Open helper GUI
             helperGUIHK := "<+<^<!G"
             hotkey, %helperGUIHK%, helperGUILab
         ;Active window check 
-            activeCheckHK := "<+<^<!_"
+            activeCheckHK := ">+F24"
             hotkey, %activeCheckHK%, activeCheckLab 
         ;Kill current active process/close tab
             killProcessHK:= "<+F14"
@@ -72,13 +72,13 @@ reloadBrightness := GetLampBrightness()
             monitorCycleHK := "F24"
             hotkey, %monitorCycleHK%, monitorCycleLab
         ;Move active window to other monitor    
-            monitor1OnlyHK := "<+F20"
+            monitor1OnlyHK := ">+>^F22"
             hotkey, %monitor1OnlyHK%, monitor1OnlyLab
         ;Move active window to other monitor    
-            monitor2OnlyHK := "<+F22"
+            monitor2OnlyHK := ">+>^F23"
             hotkey, %monitor2OnlyHK%, monitor2OnlyLab
         ;Move active window to other monitor    
-            monitorExtendHK := "<+F24"
+            monitorExtendHK := ">+>^F24"
             hotkey, %monitorExtendHK%, monitorExtendLab
     ;HOTKEYS Application open and make active. Cycle tabs
         ;Main Browser Account make active/cycle tabs
@@ -87,39 +87,42 @@ reloadBrightness := GetLampBrightness()
         ;Second Browser Account make active/cycle tabs
             SecondBrowserHK := ">^F20"
             hotkey, %SecondBrowserHK%, SecondBrowserLab
+        ;Chrome Work profile open/make active
+            ChromeWorkHK := ">!>^F24"
+            hotkey, %ChromeWorkHK%, ChromeWorkLab 
         ;Visual Studio make active/cycle tabs
-            VSCodeOpenHK := ">^F21"
+            VSCodeOpenHK := ">+>^F19"
             hotkey, %VSCodeOpenHK%, VSCodeOpenLab
         ;TIDAL make active/open
-            tidalOpenHK := ">^F22"
+            tidalOpenHK := ">^F23"
             hotkey, %tidalOpenHK%, tidalOpenLab
         ;Pocket Casts make active/open
-            PCOpenHK := ">+>^F22"
+            PCOpenHK := "F21"
             hotkey, %PCOpenHK%, PCOpenLab
         ;VLC Player make ative/open
             vlcOpenHK := ">^F24"
             hotkey, %vlcOpenHK%, vlcOpenLab        
         ;Photoshop make active/open cycle tabs
-            psOpenHK := ">!>^F19"
+            psOpenHK := ">+>^F20"
             hotkey, %psOpenHK%, psOpenLab
-        ;Steam Main make active/open   
-            ;steamOpenMainHK := ">^F24"
-            ;hotkey, %steamOpenMainHK%, steamOpenMainLab
-        ;Steam Alt make active/open 
-            ;steamOpenAltHK := ">+>^F24"
-            ;hotkey, %steamOpenAltHK%, steamOpenAltLab
+        ;Steam Gui Launch
+            steamGuiHK := "F23"
+            hotkey, %steamGuiHK%, steamGuiLab
         ;Koolertron Editor active/open
-            koolertronOpenHK := "<+>^F24"
+            koolertronOpenHK := ">+>^F20"
             hotkey, %koolertronOpenHK%, koolertronOpenLab
         ;Volume mixer open/make active
-            volMixOpenHK := "F23"
+            volMixOpenHK := ">+F21"
             hotkey, %volMixOpenHK%, volMixOpenLab  
         ;Twitch app open/make active
-            TwitchOpenHK := ">^F23"
+            TwitchOpenHK := ">^F21"
             hotkey, %TwitchOpenHK%, TwitchOpenLab
-        ;Firefox Alt Account open new tab
-            ;ffNewTabAltHK := ">+>^F20"
-            ;hotkey, %ffNewTabAltHK%, ffNewTabAltLab
+        ;Youtube Hifi open/make active
+            YoutubeHifiHK := ">^F22"
+            Hotkey, %YoutubeHifiHK%, YoutubeHifiLab 
+        ;Appdata open
+            AppdataOpenHK := ">!>^F23"
+            Hotkey, %AppdataOpenHK%, AppdataOpenLab
     ;HOTKEYS Volume controls
         ;focused application volumes
             ;focused application volume down 2%
@@ -200,33 +203,33 @@ reloadBrightness := GetLampBrightness()
     ;HOTKEYS EQ and Sound Output
         ;Switch output with EQ change
             ;Set BTA30 Digital output/Peace EQ XM4
-                DOEQHK := "<+>^F19"
+                DOEQHK := ">!>^F19"
                 hotkey, %DOEQHK%, DOEQLab   
             ;Set Logitech Pro X output/Peace EQ Pro X
-                LPXEQHK := "<+>^F20"
+                LPXEQHK := ">!>^F20"
                 hotkey, %LPXEQHK%, LPXEQLab   
             ;Set FiiO K5 Speaker output/Peace EQ 770 80ohm
-                K5770EQHK := "<+>^F21"
+                K5770EQHK := ">!>^F21"
                 hotkey, %K5770EQHK%, K5770EQLab  
             ;Set FiiO K5 Speaker output/Peace EQ MK5  
-                K5MK5EQHK := "<+>^F22"
+                K5MK5EQHK := ">!>^F22"
                 hotkey, %K5MK5EQHK%, K5MK5EQLab 
     ;HOTKEYS Kasa lighting
         ;Main room Light bulb on/off + brightness
             ;Turn off bulb
-                lampOffHK := ">!F21"
+                lampOffHK := "<+>^F19"
                 hotkey, %lampOffHK%, lampOffLab              
             ;Turn on/brightness 1%
-                lamp1HK := ">!F22"
+                lamp1HK := "<+>^F20"
                 hotkey, %lamp1HK%, lamp1Lab 
             ;Turn on/brightness down 10%
-                lampBrightDownHK := ">!F23"
+                lampBrightDownHK := "<+>^F21"
                 hotkey, %lampBrightDownHK%, lampBrightDownLab 
             ;Turn on/brightness up 10%
-                lampBrightUpHK := ">!F24"
+                lampBrightUpHK := "<+>^F22"
                 hotkey, %lampBrightUpHK%, lampBrightUpLab  
             ;Lamp Gui
-                lampGUIHK := "<+<^<!W"
+                lampGUIHK := "<+>^F23"
                 hotkey, %lampGUIHK%, lampGUILab
         Return
 ;Main code
@@ -263,7 +266,7 @@ reloadBrightness := GetLampBrightness()
                 return
         ;Open helper GUI
             helperGUILab:
-                HelperGUI()
+                Run HelperGui.ahk
                 Return
         ;Kill current active process/close tab
             killProcessLab:
@@ -302,6 +305,10 @@ reloadBrightness := GetLampBrightness()
             SecondBrowserLab:
                 SecondBrowerLaunchActive()
                 Return
+        ;Chrome Work profile open/make active
+            ChromeWorkLab:    
+                ChromeWorkLaunchActive()
+                Return
         ;Visual Studio make active/cycle tabs
             VSCodeOpenLab:
                 VSCodeLaunchActive()
@@ -322,13 +329,9 @@ reloadBrightness := GetLampBrightness()
             psOpenLab:
                 PSLaunchActive()
                 Return
-        ;Steam Main make active/open 
-            steamOpenMainLab:
-                SteamMainLaunchActive()
-                Return
-        ;Steam Alt make active/open
-            steamOpenAltLab:
-                SteamAltLaunchActive()
+        ;Steam Gui Launch
+            steamGuiLab:
+                SteamGui()
                 Return
         ;Koolertron Editor active/open
             koolertronOpenLab:
@@ -341,6 +344,14 @@ reloadBrightness := GetLampBrightness()
         ;Twitch app open/make active
             TwitchOpenLab:
                 TwitchLaunchActive()
+                Return
+        ;Youtube Hifi open/make active
+            YoutubeHifiLab:
+                YouTubeHifiLaunch()
+                Return 
+        ;Open AppData folder
+            AppdataOpenLab:
+                AppDataLaunch()
                 Return
     ;Volume Controls
         ;focused application volumes

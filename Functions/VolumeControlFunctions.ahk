@@ -32,11 +32,12 @@
                 Run cmd.exe /c start nircmd.exe changeappvolume chrome.exe %percentRecalc% ,,Hide
             }
         }
-        Else
+        If (focusedClass = "Qt5QWindowIcon")
         {
-            Run cmd.exe /c start nircmd.exe changeappvolume focused %percentRecalc% ,,Hide
+            percentRecalc := percentRecalc / 10
         }
-        return  
+        Run cmd.exe /c start nircmd.exe changeappvolume focused %percentRecalc% ,,Hide 
+        Return
     }
 ;Media application volume control function
     MediaVol(percent,plusOrMinus)
