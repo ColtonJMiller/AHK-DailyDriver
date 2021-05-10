@@ -348,79 +348,6 @@
         }  
         Return
     }
-;Twitch App Launch
-    TwitchLaunchActive()
-    {
-        exePath := A_AppData . "\Twitch\Bin\Twitch.exe"
-        titleTag := "Twitch"
-        appClass := "Chrome_WidgetWin_1"
-        IfWinExist, %titleTag% ahk_class %appClass%
-        {       
-            IfWinActive, %titleTag% ahk_class %appClass%
-            {
-                return                  
-            }
-            Else 
-            {
-                WinActivate,  %titleTag% ahk_class %appClass%
-                Return
-            }
-            Return
-        }
-        IfWinNotExist, %titleTag% ahk_class %appClass%
-        {
-            RunWait, %exePath%,,,runPID
-            WinActivate, ahk_pid runPID 
-            Sleep, 500
-            Return
-        } 
-        Return   
-    } 
-;Youtube Hifi open/make active
-    YouTubeHifiLaunch()
-    {
-        exePath := "C:\Users\" . A_UserName . "\AppData\Local\Vivaldi\Application\vivaldi.exe"
-        titleTag := "Vivaldi" 
-        appClass := "Chrome_WidgetWin_1"
-        profileName := "Default"
-        TitleholdArr := []
-        loopCount := 0
-        IfWinExist, %titleTag% ahk_class %appClass%
-        {
-            TitleHoldArr := []
-            ArrVal := 0
-            needleVal :="YouTube"
-            WinActivate, %titleTag% ahk_class %appClass%
-            While, ArrVal = 0
-            {
-                WinActivate, %titleTag% ahk_class %appClass%
-                WinGetTitle, titleInLoop, %titleTag% ahk_class %appClass%
-                if (TitleHoldArr)
-                {
-                    ArrVal := HasVal(TitleHoldArr,needleVal)
-                }
-                TitleHoldArr.push(titleInLoop)
-                If (ArrVal != 0)
-                {
-                    Send, {Ctrl Down}{PgUp}{Ctrl Up}
-                    Break
-                    MsgBox, Arr is not 0 %ArrVal%
-                }
-                Send, {Ctrl Down}{PgDn}{Ctrl Up}
-            }
-            Return 
-        }
-        IfWinNotExist, %titleTag% ahk_class %appClass%
-        {
-            Run, %exePath% --profile-directory=%profileName% --new-window www.youtube.com
-            WinWait, %titleTag% ahk_class %appClass%
-            WinActivate, %titleTag% ahk_class %appClass% 
-
-            Sleep, 1500
-            Return
-        } 
-        Return
-    }
 ;Appdata Folder open
     AppDataLaunch()
     {
@@ -428,17 +355,186 @@
         Run, %filePath%
         Return
     }
+;Twitch.tv browser Launch
+    TwitchLaunchActive()
+    {
+        Sleep, 50
+        exePath := "C:\Users\" . A_UserName . "\AppData\Local\Vivaldi\Application\vivaldi.exe"
+        titleTag := "Vivaldi" 
+        appClass := "Chrome_WidgetWin_1"
+        profileName := "Default"
+        SearchTerm := "Twitch"
+        IfWinExist, %titleTag% ahk_class %appClass%
+        {
+            WinActivate, %titleTag% ahk_class %appClass%
+            WinGetTitle,CurrentTab, %titleTag% ahk_class %appClass%
+            If (CurrentTab ~= SearchTerm)
+            {
+                Return
+            }
+            TitleHoldArr := BroswerLoop(titleTag,appClass,profileName,SearchTerm)
+            If (TitleHoldArr = 1)
+            {
+                Return
+            }
+            IndexVal := 0
+            For k, v in TitleHoldArr
+            {
+                If (v ~= SearchTerm)
+                {
+                    IndexVal := k
+                    Break
+                }
+            }
+            If (IndexVal = 0)
+            {
+                Run, %exePath% --profile-directory=%profileName% --new-tab www.twitch.tv,,,runPID  
+                WinWait, ahk_pid %runPID%
+                WinActivate, %titleTag% ahk_class %appClass%
+                Sleep, 200
+                Return
+            }
+            If (IndexVal != 0)
+            {
+                IndexVal := IndexVal -1
+                Loop,%IndexVal%
+                {
+                    WinActivate, %titleTag% ahk_class %appClass%
+                    Send, {Ctrl Down}{PgDn}{Ctrl Up}
+                    Sleep, 20
+                }
+                Return
+            }
+            Return
+        }
+        IfWinNotExist, %titleTag% ahk_class %appClass%
+        {
+            Run, %exePath% --profile-directory=%profileName% --new-window www.twitch.tv,,,runPID
+            WinWait, ahk_pid %runPID%
+            WinActivate, %titleTag% ahk_class %appClass% 
+            Sleep, 1500
+            Return
+        } 
+        Return
+    }
+;Youtube Hifi open/make active
+    YouTubeHifiLaunch()
+    {
+        Sleep, 50
+        exePath := "C:\Users\" . A_UserName . "\AppData\Local\Vivaldi\Application\vivaldi.exe"
+        titleTag := "Vivaldi" 
+        appClass := "Chrome_WidgetWin_1"
+        profileName := "Default"
+        SearchTerm := "YouTube"
+        IfWinExist, %titleTag% ahk_class %appClass%
+        {
+            WinActivate, %titleTag% ahk_class %appClass%
+            WinGetTitle,CurrentTab, %titleTag% ahk_class %appClass%
+            If (CurrentTab ~= SearchTerm)
+            {
+                Return
+            }
+            TitleHoldArr := BroswerLoop(titleTag,appClass,profileName,SearchTerm)
+            If (TitleHoldArr = 1)
+            {
+                Return
+            }
+            IndexVal := 0
+            For k, v in TitleHoldArr
+            {
+                If (v ~= SearchTerm)
+                {
+                    IndexVal := k
+                    Break
+                }
+            }
+            If (IndexVal = 0)
+            {
+                Run, %exePath% --profile-directory=%profileName% --new-tab www.youtube.com,,,runPID  
+                WinWait, ahk_pid %runPID%
+                WinActivate, %titleTag% ahk_class %appClass%
+                Sleep, 200
+                Return
+            }
+            If (IndexVal != 0)
+            {
+                IndexVal := IndexVal -1
+                Loop,%IndexVal%
+                {
+                    WinActivate, %titleTag% ahk_class %appClass%
+                    Send, {Ctrl Down}{PgDn}{Ctrl Up}
+                    Sleep, 10
+                }
+                Return
+            }
+            Return
+        }
+        IfWinNotExist, %titleTag% ahk_class %appClass%
+        {
+            Run, %exePath% --profile-directory=%profileName% --new-window www.twitch.tv,,,runPID
+            WinWait, ahk_pid %runPID%
+            WinActivate, %titleTag% ahk_class %appClass% 
+            Sleep, 1500
+            Return
+        } 
+        Return
+    }
 ;HasVal Dependancy for looping browser tabs 
     HasVal(haystack, needle) {
         for index, value in haystack
-            If (needle = "Start Page - Vivaldi")
-            {
-                return 0
-            }
-            if (value ~= needle)
-                return index
+        ;MsgBox, %index%`n %value%`n %needle%
+        indexLength := haystack.MaxIndex()
+        If (indexLength <= 1)
+        {
+            ;MsgBox, Index less than 1
+            Return 0
+        }
+        if (value = needle)
+            return index
         if !(IsObject(haystack))
             throw Exception("Bad haystack!", -1, haystack)
         return 0
+    }
+;Browser Loop Function
+    BroswerLoop(title,class,profile,searchVal)
+    {
+        TitleHoldArr := []
+        loopCounter := 1
+        ArrVal := 0
+        WinActivate, %title% ahk_class %class%
+        WinGetTitle, FirstActive, %title% ahk_class %class%
+        ;If the firstActiveTitle is Startpage skip until it is not
+        While, FirstActive = "Start Page - Vivaldi"
+        {
+                Send, {Ctrl Down}{PgDn}{Ctrl Up}
+                WinGetTitle, FirstActive, %title% ahk_class %class%                           
+        }
+        
+        While, ArrVal = 0
+        {
+            ;MsgBox, %loopCounter%
+            WinGetTitle, titleInLoop, %title% ahk_class %class%
+            If (titleInLoop ~= searchVal)
+            {
+                Return 1
+            } 
+            TitleHoldArr.push(titleInLoop)
+            ArrVal := HasVal(TitleHoldArr,FirstActive)
+            TitleHoldCount := TitleholdArr.MaxIndex()
+            ;MsgBox, %TitleHoldCount%
+            loopCounter++
+            WinActivate, %title% ahk_class %class% 
+            Sleep, 10
+            If (ArrVal != 0)
+            {
+                Break
+            }
+            If (ArrVal = 0)
+            {
+                Send, {Ctrl Down}{PgDn}{Ctrl Up}
+            }
+        }
+        TitleHoldArr.pop()
+        Return TitleHoldArr
     }
 

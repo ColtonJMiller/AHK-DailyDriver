@@ -466,22 +466,22 @@ reloadBrightness := GetLampBrightness()
             ;Set BTA30 Digital output/Peace EQ XM4
                 DOEQLab:
                     SwitchBTA30(1, "BTA 30", "Sony WH-1000XM4")
-                    Sleep, 1000
+                    Sleep, 200
                     Return
             ;Set Logitech Pro X output/Peace EQ Pro X
                 LPXEQLab:
                     SwitchProX(2, "Logitech Pro X", "Pro X") 
-                    Sleep, 1000
+                    Sleep, 200
                     Return
             ;Set FiiO K5 Speaker output/Peace EQ 770 80ohm
                 K5770EQLab:
                     SwitchK5Pro(3,"Fiio K5 Pro","Beyerdynamic DT770 80 ohm")
-                    Sleep, 1000
+                    Sleep, 200
                     Return
             ;Set FiiO K5 Speaker output/Peace EQ MK5
                 K5MK5EQLab: 
                     SwitchK5Pro(4,"Fiio K5 Pro","Etymotic Research MK5")
-                    Sleep, 1000
+                    Sleep, 200
                     Return
     ;Kasa lighting
         ;Main room Light bulb on/off + brightness

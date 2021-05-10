@@ -75,7 +75,7 @@
         ahkHoldPath := fixedDocPath . "/AHKPercentHolds/"
         winPosSavePath := ahkHoldPath . "WinConfigPositionSave.txt"
         ;MsgBox, Monitor 1:`n Left: %monitor1AreaLeft% Top: %monitor1AreaTop% Right: %monitor1AreaRight% Bottom: %monitor1AreaBottom%`nMonitor 2:`n Left: %monitor2AreaLeft% Top: %monitor2AreaTop% Right: %monitor2AreaRight% Bottom: %monitor2AreaBottom%
-        currentActiveWin := "ahk_id " . WinExist("A")
+        currentActiveWin := WinExist("A")
         Loop, Read, %winPosSavePath%
         {
             StringSplit, HoldArr, A_LoopReadLine, |
@@ -95,7 +95,7 @@
                 WinMinimize, %idAtIndex%
             }
         }   
-        WinActivate, %currentActiveWin% 
+        WinActivate, ahk_id %currentActiveWin% 
         Return
     }
 ;Set Desktop config to Monitor 1 only
