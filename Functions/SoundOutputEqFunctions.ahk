@@ -1,6 +1,7 @@
 ;Switch Output device to BTA 30
     SwitchBTA30(hKNum, output, eQ)
     {
+        ; MsgBox, BTA30
         Run %ComSpec% /c start nircmd.exe setdefaultsounddevice "Digital Output" 1 ,,Hide 
         Run %ComSpec% /c start nircmd.exe setdefaultsounddevice "Digital Output" 2 ,,Hide
         Send, {ShiftDown}{AltDown}{CtrlDown}{Numpad0}{CtrlUp}{AltUp}{ShiftUp}
@@ -10,8 +11,9 @@
 ;Switch Output device to Logitech Pro X
     SwitchProX(hKNum, output, eQ)
     {
+        ;MsgBox, Pro X
         Run %ComSpec% /c start nircmd.exe setdefaultsounddevice "Pro X" 1 ,,Hide
-        Run %ComSpec% /c start nircmd.exe setdefaultsounddevice "Pro X" 2 ,,Hide
+        Run %ComSpec% /c start nircmd.exe setdefaultsounddevice "Pro X" 2 ,,Hide,runPID
         Send, {ShiftDown}{AltDown}{CtrlDown}{Numpad1}{CtrlUp}{AltUp}{ShiftUp}
         SoundOutGUI(hKNum,output,eQ)     
         Return   
@@ -19,6 +21,8 @@
 ;Switch Output device to Fiio K5 Pro
     SwitchK5Pro(hKNum, output, eQ)
     {
+        ;MsgBox, K5 Pro
+
         If (eQ = "Beyerdynamic DT770 80 ohm")
         {
             Run %ComSpec% /c start nircmd.exe setdefaultsounddevice "K5 Pro" 1 ,,Hide
@@ -40,11 +44,16 @@
     SoundOutGUI(hKNum, output, eQ)
     {
         global
+        IfWinExist, SoundOSD
+        {
+            WinClose, SoundOSD
+        }
+        Gui, Destroy
         currActive := "ahk_id" . WinExist("A")
         SysGet, monitor1Area, MonitorWorkArea, 1
         SysGet, monitor2Area, MonitorWorkArea, 2
         ;MsgBox, Monitor 1:`n Left: %monitor1AreaLeft% Top: %monitor1AreaTop% Right: %monitor1AreaRight% Bottom: %monitor1AreaBottom%`nMonitor 2:`n Left: %monitor2AreaLeft% Top: %monitor2AreaTop% Right: %monitor2AreaRight% Bottom: %monitor2AreaBottom%
-        Gui, OSD:New, +AlwaysOnTop -Resize -Caption +ToolWindow
+        Gui,New,+AlwaysOnTop -Resize -Caption +ToolWindow,SoundOSD
         Gui, Color, 000001, 00FF00
         Gui, Font,, Courier New
         Gui, Margin, 0, 0
@@ -98,7 +107,7 @@
         WinSet, Transparent, 200
         Gui, Show, h80 W400 X1520 Y960
         WinActivate, %currActive%
-        Sleep, 2000
-        Gui,Hide
-        Return
+        Sleep, 500
+        Gui,Destroy
+        Return  
     }

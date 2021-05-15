@@ -389,7 +389,6 @@
             If (IndexVal = 0)
             {
                 Run, %exePath% --profile-directory=%profileName% --new-tab www.twitch.tv,,,runPID  
-                WinWait, ahk_pid %runPID%
                 WinActivate, %titleTag% ahk_class %appClass%
                 Sleep, 200
                 Return
@@ -450,8 +449,7 @@
             }
             If (IndexVal = 0)
             {
-                Run, %exePath% --profile-directory=%profileName% --new-tab www.youtube.com,,,runPID  
-                WinWait, ahk_pid %runPID%
+                Run, %exePath% --profile-directory=%profileName% --new-tab www.youtube.com,,,runPID
                 WinActivate, %titleTag% ahk_class %appClass%
                 Sleep, 200
                 Return

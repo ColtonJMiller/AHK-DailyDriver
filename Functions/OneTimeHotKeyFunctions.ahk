@@ -90,3 +90,30 @@
         WinClose, A
         Return
     }
+;Join Argument function
+    JoinArgs(p*) 
+    {
+        o:=""
+        s:=" "
+        for k,v in p {
+            if InStr(v,"""") {
+                RegExReplace(v, """" , """""")
+            }
+            if InStr(v," ") {
+                v := """" . v . """"
+            }
+            o.=s v
+        }
+        return SubStr(o,StrLen(s)+1)
+    }
+;Run current script as admin
+    RunAsAdmin() {
+        If Not A_IsAdmin {
+            ArgsToPass := JoinArgs(A_Args*)
+            Run, *RunAs "%A_ScriptFullPath% " %ArgsToPass%
+            if ErrorLevel
+                ExitApp
+            ExitApp
+        }
+        return
+    }

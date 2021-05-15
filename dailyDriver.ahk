@@ -21,516 +21,445 @@ SetTitleMatchMode, 2
 #Include, Functions/VolumeControlFunctions.ahk
 #Include, Functions/SoundOutputEqFunctions.ahk
 #Include, Functions/LampFunctions.ahk
-
+; DetectHiddenWindows, on
+;Run Script as admin
+RunAsAdmin()
+;SetNumLockState, AlwaysOn
 reloadBrightness := GetLampBrightness()
 ;Global variables
+    ;Row 4 Modifiers
+        r4c1 := "NumpadMult" 
+        r4c2 := "NumpadDot" 
+        r4c3 := "NumpadSub"
+        r4c4 := "NumpadAdd"
+        r4c5 := "Numpad0"   
     StringReplace, fixedDocPath, A_MyDocuments, \, /, All]
     ahkHoldPath := fixedDocPath . "/AHKPercentHolds/"
     LineInPID := grabInputPID()
+    ; MsgBox, %LineInPID%
+    ; WinGet, LineInArr, ID, ahk_pid %LineInPID%
+    ; MsgBox, %LineInArr%
+    ; Loop,%LineInArr%
+    ; {
+    ;     MsgBox, %A_Index%   
+    ; }
     lampBrightVal := 1
     lampOnOffState := GetLampState()
-    MsgBox,, Notice, Script load complete, 1
-;HOTKEYS 
-    ;HOTKEYS Media Keys 
-        ;Track control
-            ;Track Previous
-                trackPrevHK := "<+F13"
-                hotkey, %trackPrevHK%, trackPrevLab             
-            ;Track play/pause
-                trackPlayHK := "<+F15"
-                hotkey, %trackPlayHK%, trackPlayLab   
-            ;Track next 
-                trackNextHK := "<+F17"
-                hotkey, %trackNextHK%, trackNextLab 
-    ;HOTKEYS One time helper keys
-        ;Open hotkey sheet
-            SheetHK := "<+<^<!H"
-            hotkey, %SheetHK%, sheetLab
-        ;All active Windows
-            allActiveHK := ">+F22"
-            hotkey, %allActiveHK%, allActiveLab
-        ;Script reload
-            reloadHK := ">+F23"
-            hotkey, %reloadHK%, reloadLab
-        ;Open helper GUI
-            helperGUIHK := "<+<^<!G"
-            hotkey, %helperGUIHK%, helperGUILab
-        ;Active window check 
-            activeCheckHK := ">+F24"
-            hotkey, %activeCheckHK%, activeCheckLab 
-        ;Kill current active process/close tab
-            killProcessHK:= "<+F14"
-            hotkey, %killProcessHK%, killProcessLab  
-        ;Test Hot Key
-            TestHK := "<^<!<+Q"
-            hotkey, %TestHK%, TestLab            
-    ;HOTKEYS Application min, max, and monitor cycle 
-        ;Maximize or restore toggle for active window 
-            maxToggleHK := "F22"
-            hotkey, %maxToggleHK%, maxToggleLab
-        ;Move active window to other monitor    
-            monitorCycleHK := "F24"
-            hotkey, %monitorCycleHK%, monitorCycleLab
-        ;Move active window to other monitor    
-            monitor1OnlyHK := ">+>^F22"
-            hotkey, %monitor1OnlyHK%, monitor1OnlyLab
-        ;Move active window to other monitor    
-            monitor2OnlyHK := ">+>^F23"
-            hotkey, %monitor2OnlyHK%, monitor2OnlyLab
-        ;Move active window to other monitor    
-            monitorExtendHK := ">+>^F24"
-            hotkey, %monitorExtendHK%, monitorExtendLab
-        ;Reset Active Window size    
-            activeSizeResetHK := "<+F16"
-            hotkey, %activeSizeResetHK%, activeSizeResetLab
-    ;HOTKEYS Application open and make active. Cycle tabs
-        ;Main Browser Account make active/cycle tabs
-            MainBrowserHK := ">^F19"
-            hotkey, %MainBrowserHK%, MainBrowserLab
-        ;Second Browser Account make active/cycle tabs
-            SecondBrowserHK := ">^F20"
-            hotkey, %SecondBrowserHK%, SecondBrowserLab
-        ;Chrome Work profile open/make active
-            ChromeWorkHK := ">!>^F24"
-            hotkey, %ChromeWorkHK%, ChromeWorkLab 
-        ;Visual Studio make active/cycle tabs
-            VSCodeOpenHK := ">+>^F19"
-            hotkey, %VSCodeOpenHK%, VSCodeOpenLab
-        ;TIDAL make active/open
-            tidalOpenHK := ">^F23"
-            hotkey, %tidalOpenHK%, tidalOpenLab
-        ;Pocket Casts make active/open
-            PCOpenHK := "F21"
-            hotkey, %PCOpenHK%, PCOpenLab
-        ;VLC Player make ative/open
-            vlcOpenHK := ">^F24"
-            hotkey, %vlcOpenHK%, vlcOpenLab        
-        ;Photoshop make active/open cycle tabs
-            psOpenHK := ">+>^F20"
-            hotkey, %psOpenHK%, psOpenLab
-        ;Steam Gui Launch
-            steamGuiHK := "F23"
-            hotkey, %steamGuiHK%, steamGuiLab
-        ;Koolertron Editor active/open
-            koolertronOpenHK := ">+>^F20"
-            hotkey, %koolertronOpenHK%, koolertronOpenLab
-        ;Volume mixer open/make active
-            volMixOpenHK := ">+F21"
-            hotkey, %volMixOpenHK%, volMixOpenLab  
-        ;Twitch app open/make active
-            TwitchOpenHK := ">^F21"
-            hotkey, %TwitchOpenHK%, TwitchOpenLab
-        ;Youtube Hifi open/make active
-            YoutubeHifiHK := ">^F22"
-            Hotkey, %YoutubeHifiHK%, YoutubeHifiLab 
-        ;Appdata open
-            AppdataOpenHK := ">!>^F23"
-            Hotkey, %AppdataOpenHK%, AppdataOpenLab
-    ;HOTKEYS Volume controls
-        ;focused application volumes
-            ;focused application volume down 2%
-                focusVolDown2HK := "F13"
-                hotkey, %focusVolDown2HK%, focusVolDown2Lab
-            ;focused application volume up 2%
-                focusVolUp2HK := "F14"
-                hotkey, %focusVolUp2HK%, focusVolUp2Lab
-            ;focused application volume down 5%
-                focusVolDown5HK := ">+F13"
-                hotkey, %focusVolDown5HK%, focusVolDown5Lab
-            ;focused application volume up 5%
-                focusVolUp5HK := ">+F14"
-                hotkey, %focusVolUp5HK%, focusVolUp5Lab
-            ;focused application volume down 10%
-                focusVolDown10HK := ">!F13"
-                hotkey, %focusVolDown10HK%, focusVolDown10Lab
-            ;focused application volume down 10%
-                focusVolUp10HK := ">!F14"
-                hotkey, %focusVolUp10HK%, focusVolUp10Lab
-        ;Media volumes
-            ;Media volume control (firefox,chrome,tidal,and spotify) down 2%
-                mediaVolDown2HK := "F15"
-                hotkey, %mediaVolDown2HK%, mediaVolDown2Lab
-            ;Media volume control (firefox,chrome,tidal,and spotify) up 2%
-                mediaVolUp2HK := "F16"
-                hotkey, %mediaVolUp2HK%, mediaVolUp2Lab
-            ;Media volume control (firefox,chrome,tidal,and spotify) down 5%
-                mediaVolDown5HK := ">+F15"
-                hotkey, %mediaVolDown5HK%, mediaVolDown5Lab
-            ;Media volume control (firefox,chrome,tidal,and spotify) up 5%
-                mediaVolUp5HK := ">+F16"
-                hotkey, %mediaVolUp5HK%, mediaVolUp5Lab
-            ;Media volume control (firefox,chrome,tidal,and spotify) down 10%
-                mediaVolDown10HK := ">!F15"
-                hotkey, %mediaVolDown10HK%, mediaVolDown10Lab
-            ;Media volume control (firefox,chrome,tidal,and spotify) up 10%
-                mediaVolUp10HK := ">!F16"
-                hotkey, %mediaVolUp10HK%, mediaVolUp10Lab
-        ;Line in volumes
-            ;Line in volume control down 1%
-                lineVolDown1HK := "F17"
-                hotkey, %lineVolDown1HK%, lineVolDown1Lab
-            ;Line in volume control up 1%
-                lineVolUp1HK := "F18"
-                hotkey, %lineVolUp1HK%, lineVolUp1Lab
-            ;Line in volume control down 5%
-                lineVolDown5HK := ">+F17"
-                hotkey, %lineVolDown5HK%, lineVolDown5Lab
-            ;Line in volume control up 5%
-                lineVolUp5HK := ">+F18"
-                hotkey, %lineVolUp5HK%, lineVolUp5Lab
-            ;Line in volume control down 10%  
-                lineVolDown10HK := ">!F17"
-                hotkey, %lineVolDown10HK%, lineVolDown10Lab
-            ;Line in volume control up 10%
-                lineVolUp10HK := ">!F18"
-                hotkey, %lineVolUp10HK%, lineVolUp10Lab
-        ;main system volumes   
-            ;main system volume down 2%
-                mainSysVolDown2HK := "F19"
-                hotkey, %mainSysVolDown2HK%, mainSysVolDown2Lab
-            ;main system volume up 2%
-                mainSysVolUp2HK := "F20"
-                hotkey, %mainSysVolUp2HK%, mainSysVolUp2Lab
-            ;main system volume down 4%
-                mainSysVolDown4HK := ">+F19"
-                hotkey, %mainSysVolDown4HK%, mainSysVolDown4Lab
-            ;main system volume up 4%
-                mainSysVolUp4HK := ">+F20"
-                hotkey, %mainSysVolUp4HK%, mainSysVolUp4Lab
-            ;main system volume down 10%
-                mainSysVolDown10HK := ">!F19"
-                hotkey, %mainSysVolDown10HK%, mainSysVolDown10Lab        
-            ;main system volume up 10% 
-                mainSysVolUp10HK := ">!F20"
-                hotkey, %mainSysVolUp10HK%, mainSysVolUp10Lab   
-    ;HOTKEYS EQ and Sound Output
-        ;Switch output with EQ change
-            ;Set BTA30 Digital output/Peace EQ XM4
-                DOEQHK := ">!>^F19"
-                hotkey, %DOEQHK%, DOEQLab   
-            ;Set Logitech Pro X output/Peace EQ Pro X
-                LPXEQHK := ">!>^F20"
-                hotkey, %LPXEQHK%, LPXEQLab   
-            ;Set FiiO K5 Speaker output/Peace EQ 770 80ohm
-                K5770EQHK := ">!>^F21"
-                hotkey, %K5770EQHK%, K5770EQLab  
-            ;Set FiiO K5 Speaker output/Peace EQ MK5  
-                K5MK5EQHK := ">!>^F22"
-                hotkey, %K5MK5EQHK%, K5MK5EQLab 
-    ;HOTKEYS Kasa lighting
-        ;Main room Light bulb on/off + brightness
-            ;Turn off bulb
-                lampOffHK := "<+>^F19"
-                hotkey, %lampOffHK%, lampOffLab              
-            ;Turn on/brightness 1%
-                lamp1HK := "<+>^F20"
-                hotkey, %lamp1HK%, lamp1Lab 
-            ;Turn on/brightness down 10%
-                lampBrightDownHK := "<+>^F21"
-                hotkey, %lampBrightDownHK%, lampBrightDownLab 
-            ;Turn on/brightness up 10%
-                lampBrightUpHK := "<+>^F22"
-                hotkey, %lampBrightUpHK%, lampBrightUpLab  
-            ;Lamp Gui
-                lampGUIHK := "<+>^F23"
-                hotkey, %lampGUIHK%, lampGUILab
-        Return
+    MsgBox,, Notice, Script load complete, 1  
+   
 ;Main code
-    ;Media Keys
-        ;Track Control
-            ;Track Previous
-                trackPrevLab:
-                    Send {Media_Prev}
-                    return
-            ;Track Play/Pause
-                trackPlayLab:
-                    Send {Media_Play_Pause}
-                    return
-            ;Track next
-                trackNextLab:
-                    Send {Media_Next}
-                    return
-    ;One time helper keys
-        ;Open hotkey sheet
-            sheetLab:
-                OpenSpreadSheet()
-                Return
-        ;Active window check
-            activeCheckLab:
-                GetActiveWindowData()
-                Return
-        ;All active Windows
-            allActiveLab:
-                GetAllWindows()
-                Return
-        ;Script reload
-            reloadLab: 
-                ReloadScript()
-                return
-        ;Open helper GUI
-            helperGUILab:
-                Run HelperGui.ahk
-                Return
-        ;Kill current active process/close tab
-            killProcessLab:
-                KillProcess()
-                Return
-        ;OSD Test
-            TestLab:
-                Return
-    ;Application min, max, and monitor cycle
-        ;Maximize or restore toggle for active window 
-            maxToggleLab:
-                MaxToggle()
-                Return
-        ;Move active window to other monitor
-            monitorCycleLab:
-                CycleMonitor()
-                Return
-        ;Set Monitor 1 only
-            monitor1OnlyLab:
-                Monitor1OnlyConfig()       
-                Return
-        ;Set monitor 2 only
-            monitor2OnlyLab:
-                Monitor2OnlyConfig()
-                Return
-        ;Set extended monitor layout
-            monitorExtendLab:
-                MonitorExtendConfig()
-                Return    
-        ;Reset Active Window size
-            activeSizeResetLab:
-                ActiveSizeReset()
-                Return     
-    ;Application open and make active. Cycle tabs
-        ;Firefox Default Account make active/cycle tabs
-            MainBrowserLab:
-                MainBrowerLaunchActive()
-                Return
-        ;Firefox Alt Account make active/cycle tabs
-            SecondBrowserLab:
-                SecondBrowerLaunchActive()
-                Return
-        ;Chrome Work profile open/make active
-            ChromeWorkLab:    
-                ChromeWorkLaunchActive()
-                Return
-        ;Visual Studio make active/cycle tabs
-            VSCodeOpenLab:
-                VSCodeLaunchActive()
-                Return  
-        ;TIDAL make active/open
-            tidalOpenLab:
-                TidalLaunchActive()
-                Return
-        ;Pocket Casts make active/open
-            PCOpenLab:    
-                PCLaunchActive()
-                Return
-        ;VLC Player make active/open
-            vlcOpenLab:
-                VLCLaunchActive()
-                Return               
-        ;Photoshop make active/open cycle tabs  
-            psOpenLab:
-                PSLaunchActive()
-                Return
-        ;Steam Gui Launch
-            steamGuiLab:
-                SteamGui()
-                Return
-        ;Koolertron Editor active/open
-            koolertronOpenLab:
-                KoolertronLaunchActive()
-                Return
-        ;Volume mixer open/make active
-            volMixOpenLab:
-                VolMixerLaunchActive()
-                Return
-        ;Twitch app open/make active
-            TwitchOpenLab:
-                TwitchLaunchActive()
-                Return
-        ;Youtube Hifi open/make active
-            YoutubeHifiLab:
-                YouTubeHifiLaunch()
-                Return 
-        ;Open AppData folder
-            AppdataOpenLab:
-                AppDataLaunch()
-                Return
-    ;Volume Controls
-        ;focused application volumes
-            ;focused application volume down 2%
-                focusVolDown2Lab:
-                    focusVol(2,"-")
-                    Return
-            ;focused application volume up 2%        
-                focusVolUp2Lab:
+    ;Modifier Remaps
+        NumpadMult::
+            Return
+        NumpadDot::
+            Return 
+        NumpadSub::
+            Return
+        NumpadAdd::
+            Return
+        Numpad0::  
+            Return 
+    ;No Modifer Hotkeys
+        #If
+        ;MacroPad
+            ;Row 1 
+                ;Focus volume up 2%   
+                F14::
                     focusVol(2,"+")
                     Return
-            ;focused application volume down 5%
-                focusVolDown5Lab:
-                    focusVol(5,"-")
-                    Return
-            ;focused application volume up 5%
-                focusVolUp5Lab:
-                    focusVol(5,"+")
-                    Return
-            ;focused application volume down 10%
-                focusVolDown10Lab:
-                    focusVol(10,"-")
-                    Return
-            ;focused application volume up 10%
-                focusVolUp10Lab:
-                    focusVol(10,"+")
-                    Return
-        ;Media volumes
-            ;Media volume control down 2%
-                mediaVolDown2Lab:
-                    MediaVol(2,"-")
-                    Return
-            ;Media volume control (firefox,chrome,tidal,and spotify) up 2%
-                mediaVolUp2Lab:
+                ;Media volume up 2%  
+                F16::
                     MediaVol(2,"+")
                     Return
-            ;Media volume control (firefox,chrome,tidal,and spotify) down 5%
-                mediaVolDown5Lab:
-                    MediaVol(5,"-")
-                    Return
-            ;Media volume control (firefox,chrome,tidal,and spotify) up 5%
-                mediaVolUp5Lab:
-                    MediaVol(5,"+")
-                    Return
-            ;Media volume control (firefox,chrome,tidal,and spotify) down 10%
-                mediaVolDown10Lab:
-                    MediaVol(10,"-")
-                    Return
-            ;Media volume control (firefox,chrome,tidal,and spotify) up 10%
-                mediaVolUp10Lab:
-                    MediaVol(10,"+")
-                    Return
-        ;Line in volumes
-            ;Line in volume control down 2%
-                lineVolDown1Lab:
-                    LineInVol(LineInPID,2,"-")
-                    Return            
-            ;Line in volume control up 2% 
-                lineVolUp1Lab: 
+                ;Line in volume up 2%  
+                F18::
                     LineInVol(LineInPID,2,"+")
-                    Return       
-            ;Line in volume control down 5%
-                lineVolDown5Lab:  
-                    LineInVol(LineInPID,5,"-")
-                    Return       
-            ;Line in volume control up 5%  
-                lineVolUp5Lab: 
-                    LineInVol(LineInPID,5,"+")
-                    Return       
-            ;Line in volume control down 10%
-                lineVolDown10Lab:  
-                    LineInVol(LineInPID,10,"-")
-                    Return     
-            ;Line in volume control up 10%  
-                lineVolUp10Lab:  
-                    LineInVol(LineInPID,10,"+")
-                    Return    
-        ;main system volumes
-            ;main system volume down 2%
-                mainSysVolDown2Lab:
+                    Return 
+                ;System volume up 2%  
+                F20::
+                    MainSysVol(2)
+                    Return
+                ;Maximize Window Toggle
+                F22::
+                    MaxToggle()
+                    Return
+                ;Active Window Monitor Switch
+                F24::
+                    CycleMonitor()
+                    Return
+            ;Row 2
+                ;Focus volume down 2% 
+                F13::
+                    focusVol(2,"-")
+                    Return
+                ;Media volume down 2% 
+                F15::
+                    MediaVol(2,"-")
+                    Return
+                ;Line In volume down 2% 
+                F17::
+                    LineInVol(LineInPID,2,"-")
+                    Return
+                ;System volume down 2%    
+                F19::
                     MainSysVol(-2)
                     Return
-            ;main system volume up 2%
-                mainSysVolUp2Lab:
-                    MainSysVol(2)
-                    Return    
-            ;main system volume down 4%
-                mainSysVolDown4Lab:
-                    MainSysVol(-4)
+                ;Open Pocket Casts
+                F21::
+                    PCLaunchActive()
                     Return
-            ;main system volume up 4%
-                mainSysVolUp4Lab:
-                    MainSysVol(4)
+                ;Open Steam GUI
+                F23::
+                    SteamGui()
                     Return
-            ;main system volume down 10%
-                mainSysVolDown10Lab:
-                    MainSysVol(-10)
+            ;Row 3
+                ;Launch/ Make Active Main Browser
+                NumpadDiv & Numpad1::
+                    MainBrowerLaunchActive()
                     Return
-            ;main system volume up 10%
-                mainSysVolUp10Lab:
-                    MainSysVol(10)
+                ;Launch/ Make Active Secondary Browser
+                NumpadDiv & Numpad2::
+                    SecondBrowerLaunchActive()
                     Return
-    ;EQ and Sound Output
-        ;Switch output with EQ change
-            ;Set BTA30 Digital output/Peace EQ XM4
-                DOEQLab:
-                    SwitchBTA30(1, "BTA 30", "Sony WH-1000XM4")
-                    Sleep, 200
+                ;Launch/ Make Active Twitch on Secondary Browser
+                NumpadDiv & Numpad3::
+                    TwitchLaunchActive()
                     Return
-            ;Set Logitech Pro X output/Peace EQ Pro X
-                LPXEQLab:
-                    SwitchProX(2, "Logitech Pro X", "Pro X") 
-                    Sleep, 200
+                ;Launch/ Make Active Youtube on Secondary Browser
+                NumpadDiv & Numpad4::
+                    YouTubeHifiLaunch()
+                    Return 
+                ;Launch/ Make Active Tidal
+                NumpadDiv & Numpad5::
+                    TidalLaunchActive()
                     Return
-            ;Set FiiO K5 Speaker output/Peace EQ 770 80ohm
-                K5770EQLab:
-                    SwitchK5Pro(3,"Fiio K5 Pro","Beyerdynamic DT770 80 ohm")
-                    Sleep, 200
+                ;Launch/ Make Active VLC
+                NumpadDiv & Numpad6::
+                    VLCLaunchActive()
+                    Return  
+        ;Keyboard
+            ;Launch/Make Active Helper Gui
+            <+<^<!G::
+                Run HelperGui.ahk
+                Return 
+    ;R4C1 Hotkeys
+        #If GetKeyState(r4c1,"p")
+        ;MacroPad
+            ;Row 1 
+                ;Kill Active Window   
+                F14::
+                    KillProcess()
                     Return
-            ;Set FiiO K5 Speaker output/Peace EQ MK5
-                K5MK5EQLab: 
-                    SwitchK5Pro(4,"Fiio K5 Pro","Etymotic Research MK5")
-                    Sleep, 200
+                ;Reset Active Window Size
+                F16::
+                    ActiveSizeReset()
+                    Return  
+                F18::
                     Return
-    ;Kasa lighting
-        ;Main room Light bulb on/off + brightness
-            ;Turn off bulb
-                lampOffLab:
+                F20::
+                    Return
+                F22::
+                    Return
+                F24::
+                    Return
+            ;Row 2
+                ;Media Previous
+                F13::
+                    Send {Media_Prev}
+                    return  
+                ;Media Play/Pause
+                F15::
+                    Send {Media_Play_Pause}
+                    return
+                ;Media Next
+                F17::
+                    Send {Media_Next}
+                    return
+                F19::
+                    Return
+                F21::
+                    Return
+                F23::
+                    Return
+            ;Row 3
+                ;Turn Lamp Off
+                NumpadDiv & Numpad1::
                     LampOff()
                     lampOnOffState :=0
-                    return
-            ;Turn on/brightness 1%
-                lamp1Lab:
+                    Return
+                ;Set Lamp to 1%
+                NumpadDiv & Numpad2::
                     lampBrightVal := LampBrightness(1,lampOnOffState)
                     lampOnOffState := 1            
-                    return
-            ;Turn on @ 10% or Brightness down 10%
-                lampBrightDownLab:
-                If (lampOnOffState = 0)
-                {
-                    lampBrightVal := LampBrightness(10,lampOnOffState)
-                    lampOnOffState := 1
                     Return
-                }
-                If (lampOnOffState = 1)
-                {
-                    lampBrightVal := LampBrightness(-10,lampOnOffState)
+                ;Turn on lamp @ 10%/Brightness down 10%
+                NumpadDiv & Numpad3::
+                    If (lampOnOffState = 0)
+                    {
+                        lampBrightVal := LampBrightness(10,lampOnOffState)
+                        lampOnOffState := 1
+                        Return
+                    }
+                    If (lampOnOffState = 1)
+                    {
+                        lampBrightVal := LampBrightness(-10,lampOnOffState)
+                        Return
+                    }
                     Return
-                }
-                return
-            ;Turn on @ 30% or Brightness up 10%
-                lampBrightUpLab:
-                If (lampOnOffState = 0)
-                {
-                    lampBrightVal := LampBrightness(30,lampOnOffState)
-                    lampOnOffState := 1
+                ;Turn on lamp @ 30%/Brightness down 10%
+                NumpadDiv & Numpad4::
+                    If (lampOnOffState = 0)
+                    {
+                        lampBrightVal := LampBrightness(30,lampOnOffState)
+                        lampOnOffState := 1
+                        Return
+                    }
+                    If (lampOnOffState = 1)
+                    {
+                        lampBrightVal := LampBrightness(10,lampOnOffState)
+                        Return
+                    }
                     Return
-                }
-                If (lampOnOffState = 1)
-                {
-                    lampBrightVal := LampBrightness(10,lampOnOffState)
-                    Return
-                }
-                return
-            ;Lamp Gui
-                lampGUILab:
+                ;Open Lamp GUI
+                NumpadDiv & Numpad5::
                     SetLampGui()
-                    return
-    ;Gui Destroy
-            Esc::
-                IfWinActive, ahk_class AutoHotkeyGUI
-                {
-                    WinClose, A
                     Return
-                }
+                NumpadDiv & Numpad6::
+                    Return
+    ;R4C2 Hotkeys
+        #If GetKeyState(r4c2,"p")
+        ;MacroPad
+            ;Row 1    
+                F14::
+                    Return
+                F16::
+                    Return
+                F18::
+                    Return
+                F20::
+                    Return
+                F22::
+                    Return
+                F24::
+                    Return
+            ;Row 2
+                F13::
+                    Return
+                F15::
+                    Return
+                F17::
+                    Return
+                F19::
+                    Return
+                F21::
+                    Return
+                F23::
+                    Return
+            ;Row 3
+                NumpadDiv & Numpad1::
+                    return
+                NumpadDiv & Numpad2::
+                    Return
+                NumpadDiv & Numpad3::
+                    Return
+                NumpadDiv & Numpad4::
+                    Return
+                NumpadDiv & Numpad5::
+                    Return
+                NumpadDiv & Numpad6::
+                    Return
+    ;R4C3 Hotkeys
+        #If GetKeyState(r4c3,"p")
+        ;MacroPad
+            ;Row 1    
+                F14::
+                    Return
+                F16::
+                    Return
+                F18::
+                    Return
+                F20::
+                    Return
+                F22::
+                    Return
+                F24::
+                    Return
+            ;Row 2
+                F13::
+                    Return
+                F15::
+                    Return
+                F17::
+                    Return
+                F19::
+                    Return
+                F21::
+                    Return
+                F23::
+                    Return
+            ;Row 3
+                NumpadDiv & Numpad1::
+                    return
+                NumpadDiv & Numpad2::
+                    Return
+                NumpadDiv & Numpad3::
+                    Return
+                NumpadDiv & Numpad4::
+                    Return
+                NumpadDiv & Numpad5::
+                    Return
+                NumpadDiv & Numpad6::
+                    Return
+    ;R4C4 Hotkeys
+        #If GetKeyState(r4c4,"p")
+        ;MacroPad
+            ;Row 1    
+                ;Focus volume up 10%   
+                F14::
+                    focusVol(10,"+")
+                    Return
+                ;Media volume up 10%  
+                F16::
+                    MediaVol(10,"+")
+                    Return
+                ;Line in volume up 10%  
+                F18::
+                    LineInVol(LineInPID,10,"+")
+                    Return 
+                ;System volume up 10%  
+                F20::
+                    MainSysVol(10)
+                    Return
+                F22::
+                    Return
+                F24::
+                    Return
+            ;Row 2
+                ;Focus volume down 10% 
+                F13::
+                    focusVol(10,"-")
+                    Return
+                ;Media volume down 10% 
+                F15::
+                    MediaVol(10,"-")
+                    Return
+                ;Line In volume down 10% 
+                F17::
+                    LineInVol(LineInPID,10,"-")
+                    Return
+                ;System volume down 10%    
+                F19::
+                    MainSysVol(-10)
+                    Return
+                F21::
+                    Return
+                F23::
+                    Return
+            ;Row 3
+                ;Set BTA30 Digital output/Peace EQ XM4
+                NumpadDiv & Numpad1::
+                    SwitchBTA30(1, "BTA 30", "Sony WH-1000XM4")
+                    Return
+                ;Set Logitech Pro X output/Peace EQ Pro X
+                NumpadDiv & Numpad2::
+                    SwitchProX(2, "Logitech Pro X", "Pro X") 
+                    Return
+                ;Set FiiO K5 Speaker output/Peace EQ 770 80ohm
+                NumpadDiv & Numpad3::
+                    SwitchK5Pro(3,"Fiio K5 Pro","Beyerdynamic DT770 80 ohm")
+                    Return
+                ;Set FiiO K5 Speaker output/Peace EQ MK5
+                NumpadDiv & Numpad4::
+                    SwitchK5Pro(4,"Fiio K5 Pro","Etymotic Research MK5")
+                    Return
+                ;Open Appdata Folder in File explorer
+                NumpadDiv & Numpad5::
+                    AppDataLaunch()
+                    Return
+                ;Launch/ Make active Chrome Work
+                NumpadDiv & Numpad6::
+                    ChromeWorkLaunchActive()
+                    Return
+    ;R4C5 Hotkeys
+        #If GetKeyState(r4c5,"p")
+        ;MacroPad
+            ;Row 1    
+                ;Focus volume up 5%   
+                F14::
+                    focusVol(5,"+")
+                    Return
+                ;Media volume up 5%  
+                F16::
+                    MediaVol(5,"+")
+                    Return
+                ;Line in volume up 5%  
+                F18::
+                    LineInVol(LineInPID,5,"+")
+                    Return 
+                ;System volume up 6%  
+                F20::
+                    MainSysVol(6)
+                    Return
+                ;All Active Windows GUI
+                F22::
+                    GetAllWindows()
+                    Return
+                ;Active Window Info Msg Box
+                F24::
+                    GetActiveWindowData()
+                    Return
+            ;Row 2
+                ;Focus volume down 5% 
+                F13::
+                    focusVol(5,"-")
+                    Return
+                ;Media volume down 5% 
+                F15::
+                    MediaVol(5,"-")
+                    Return
+                ;Line In volume down 5% 
+                F17::
+                    LineInVol(LineInPID,5,"-")
+                    Return
+                ;System volume down 6%    
+                F19::
+                    MainSysVol(-6)
+                    Return
+                ;Launch/ Make Active Volume Mixer
+                F21::
+                    VolMixerLaunchActive()
+                    Return
+                ;Reload Script
+                F23::
+                    ReloadScript()
+                    return
+            ;Row 3
+                ;Launch/Make Active VS Code
+                NumpadDiv & Numpad1::
+                    VSCodeLaunchActive()
+                    Return  
+                ;Launch/Make Active Photoshop
+                NumpadDiv & Numpad2::
+                    PSLaunchActive()
+                    Return
+                ;Launch/Make Active Koolertron Config
+                NumpadDiv & Numpad3::
+                    KoolertronLaunchActive()
+                    Return
+                ;Monitor 1 only desktop config
+                NumpadDiv & Numpad4::
+                    Monitor1OnlyConfig()       
+                    Return
+                ;Monitor 2 only desktop config
+                NumpadDiv & Numpad5::
+                    Monitor2OnlyConfig()
+                    Return
+                ;Extended monitor desktop config
+                NumpadDiv & Numpad6::
+                    MonitorExtendConfig()
+                    Return  
+    ;Gui Handling
+        #If WinActive("ahk_class AutoHotkeyGUI")
+        Esc::
+            WinClose, A
+            Return
